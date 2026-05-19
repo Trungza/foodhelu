@@ -203,27 +203,15 @@
 <body>
     <main class="gateway">
         <section class="hero">
-            <div class="hero-badge">CỔNG VÀO 3 SERVICE</div>
-            <h1>Trang khách public, nhân sự đăng nhập một lần rồi tự chuyển đúng service.</h1>
-            <p>Khách mở trực tiếp service customer. Nhân sự chỉ cần nhập email và mật khẩu, hệ thống sẽ tự kiểm tra role và chuyển đến trang admin hoặc trang bếp tương ứng.</p>
+            <div class="hero-badge"> Helufood</div>
+            <h1>Login</h1>
+           
         </section>
 
-        <section class="grid">
-            <article class="card">
-                <div class="icon customer"><i class="fas fa-store"></i></div>
-                <h2>Customer Service</h2>
-                <p>Trang khách public, không cần đăng nhập. Đây là service đang phục vụ menu, combo, giỏ hàng và đặt món.</p>
-                <div class="meta">
-                    <div class="pill">Public</div>
-                    <div class="pill">services/customer</div>
-                </div>
-                <a class="button customer" href="./services/customer/index.html">Mở trang khách</a>
-            </article>
 
             <article class="card">
                 <div class="icon staff"><i class="fas fa-user-lock"></i></div>
                 <h2>Đăng nhập nhân sự</h2>
-                <p>Không cần chọn trước admin hay bếp. Sau khi đăng nhập, hệ thống sẽ tự đọc role trong Appwrite và điều hướng đúng trang.</p>
                 <form class="staff-form" id="staffLoginForm">
                     <div class="form-block">
                         <label for="email">Email</label>
@@ -236,6 +224,7 @@
                     <div class="login-error" id="loginError"></div>
                     <button class="login-button" id="loginButton" type="submit">Đăng nhập và chuyển trang</button>
                 </form>
+                 <a class="button customer" href="./services/customer/index.html">Mở trang khách</a>
                 <p class="login-note">Role hỗ trợ hiện tại: <strong>admin</strong> và <strong>kitchen</strong>.</p>
             </article>
         </section>
