@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Service Gateway</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/appwrite@17.0.0"></script>
+    <style>
+        :root {
+            --bg: #08111f;
+            --card: rgba(255,255,255,0.08);
+            --line: rgba(148,163,184,0.18);
+            --text: #f8fafc;
+            --muted: #94a3b8;
+            --blue: #2563eb;
+            --green: #16a34a;
+            --red: #ef4444;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: "Plus Jakarta Sans", "Segoe UI", sans-serif;
+            color: var(--text);
+            background:
+                radial-gradient(circle at top left, rgba(37, 99, 235, 0.18), transparent 24%),
+                radial-gradient(circle at bottom right, rgba(22, 163, 74, 0.14), transparent 24%),
+                linear-gradient(135deg, #020617 0%, #08111f 42%, #0f172a 100%);
+            display: grid;
+            place-items: center;
+            padding: 28px;
+        }
+
+        .gateway {
+            width: min(1160px, 100%);
+        }
+
+        .hero {
+            max-width: 820px;
+            margin-bottom: 28px;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 14px;
+            border-radius: 999px;
+            background: rgba(37, 99, 235, 0.14);
+            border: 1px solid rgba(96, 165, 250, 0.16);
+            color: #bfdbfe;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+        }
+
+        h1 {
+            margin: 18px 0 12px;
+            font-size: clamp(40px, 6vw, 64px);
+            line-height: 0.98;
+            letter-spacing: -0.04em;
+        }
+
+        p {
+            margin: 0;
+            color: var(--muted);
+            line-height: 1.8;
+            font-size: 16px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1.2fr;
+            gap: 18px;
+        }
+
+        .card {
+            background: var(--card);
+            border: 1px solid var(--line);
+            border-radius: 28px;
+            padding: 26px;
+            backdrop-filter: blur(14px);
+            box-shadow: 0 24px 50px rgba(0, 0, 0, 0.18);
+        }
+
+        .icon {
+            width: 54px;
+            height: 54px;
+            border-radius: 18px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            margin-bottom: 18px;
+        }
+
+        .icon.customer { background: rgba(37,99,235,0.16); color: #bfdbfe; }
+        .icon.staff { background: rgba(22,163,74,0.16); color: #bbf7d0; }
+
+        .card h2 {
+            margin: 0 0 10px;
+            font-size: 24px;
+        }
+
+        .meta {
+            margin: 14px 0 18px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            border-radius: 999px;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.08);
+            color: #e2e8f0;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .button,
+        .login-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+            margin-top: 6px;
+            text-decoration: none;
+            padding: 14px 18px;
+            border-radius: 18px;
+            font-weight: 800;
+            color: white;
+            border: none;
+            font: inherit;
+            cursor: pointer;
+        }
+
+        .button.customer,
+        .login-button {
+            background: linear-gradient(135deg, #2563eb, #60a5fa);
+        }
+
+        .button:hover,
+        .login-button:hover {
+            transform: translateY(-1px);
+        }
+
+        .staff-form {
+            display: grid;
+            gap: 14px;
+            margin-top: 20px;
+        }
+
+        .form-block {
+            display: grid;
+            gap: 8px;
+        }
+
+        .form-block label {
+            font-size: 14px;
+            font-weight: 700;
+            color: #e2e8f0;
+        }
+
+        .form-block input {
+            width: 100%;
+            padding: 14px 16px;
+            border-radius: 16px;
+            border: 1px solid rgba(148,163,184,0.18);
+            background: rgba(255,255,255,0.06);
+            color: white;
+            font: inherit;
+        }
+
+        .form-block input:focus {
+            outline: none;
+            border-color: rgba(96,165,250,0.45);
+            box-shadow: 0 0 0 4px rgba(37,99,235,0.12);
+        }
+
+        .login-error {
+            min-height: 20px;
+            color: #fca5a5;
+            font-size: 14px;
+        }
+
+        .login-note {
+            margin-top: 16px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <main class="gateway">
+        <section class="hero">
+            <div class="hero-badge">CỔNG VÀO 3 SERVICE</div>
+            <h1>Trang khách public, nhân sự đăng nhập một lần rồi tự chuyển đúng service.</h1>
+            <p>Khách mở trực tiếp service customer. Nhân sự chỉ cần nhập email và mật khẩu, hệ thống sẽ tự kiểm tra role và chuyển đến trang admin hoặc trang bếp tương ứng.</p>
+        </section>
+
+        <section class="grid">
+            <article class="card">
+                <div class="icon customer"><i class="fas fa-store"></i></div>
+                <h2>Customer Service</h2>
+                <p>Trang khách public, không cần đăng nhập. Đây là service đang phục vụ menu, combo, giỏ hàng và đặt món.</p>
+                <div class="meta">
+                    <div class="pill">Public</div>
+                    <div class="pill">services/customer</div>
+                </div>
+                <a class="button customer" href="./services/customer/index.html">Mở trang khách</a>
+            </article>
+
+            <article class="card">
+                <div class="icon staff"><i class="fas fa-user-lock"></i></div>
+                <h2>Đăng nhập nhân sự</h2>
+                <p>Không cần chọn trước admin hay bếp. Sau khi đăng nhập, hệ thống sẽ tự đọc role trong Appwrite và điều hướng đúng trang.</p>
+                <form class="staff-form" id="staffLoginForm">
+                    <div class="form-block">
+                        <label for="email">Email</label>
+                        <input id="email" name="email" type="email" placeholder="staff@company.com" required>
+                    </div>
+                    <div class="form-block">
+                        <label for="password">Mật khẩu</label>
+                        <input id="password" name="password" type="password" placeholder="Nhập mật khẩu" required>
+                    </div>
+                    <div class="login-error" id="loginError"></div>
+                    <button class="login-button" id="loginButton" type="submit">Đăng nhập và chuyển trang</button>
+                </form>
+                <p class="login-note">Role hỗ trợ hiện tại: <strong>admin</strong> và <strong>kitchen</strong>.</p>
+            </article>
+        </section>
+    </main>
+
+    <script type="module" src="./services/shared/js/gateway-login.js"></script>
+</body>
+</html>

@@ -1,0 +1,92 @@
+/* ===============================================================
+   RESPONSIVE
+================================================================= */
+@media (max-width: 768px) {
+    .dashboard-shell {
+        padding: 16px;
+    }
+    .admin-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 14px;
+    }
+    .header-right {
+        width: 100%;
+        flex-wrap: wrap;
+    }
+    .admin-tabs-shell {
+        padding: 0 14px;
+    }
+    .admin-tabs {
+        justify-content: flex-start;
+        gap: 18px;
+        overflow-x: auto;
+        scrollbar-width: thin;
+    }
+    .menu-manager-toolbar {
+        grid-template-columns: 1fr;
+        padding: 14px;
+    }
+    .menu-toolbar-copy h2 {
+        font-size: 18px;
+    }
+    .menu-toolbar-stats {
+        grid-template-columns: 1fr;
+    }
+    .admin-section-header {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 0;
+    }
+    .modal {
+        padding: 14px;
+    }
+    .modal-head,
+    .menu-modal-body,
+    .modal-actions {
+        padding-left: 18px;
+        padding-right: 18px;
+    }
+    .modal-actions {
+        flex-direction: column-reverse;
+    }
+    .modal-actions .btn-primary,
+    .modal-actions .btn-secondary {
+        width: 100%;
+    }
+    .toast-root {
+        top: 14px;
+        right: 14px;
+        left: 14px;
+    }
+    .toast-message {
+        min-width: 0;
+        max-width: none;
+    }
+    .today-dish-track-item {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .today-dish-track-main {
+        min-width: 0;
+        width: 100%;
+    }
+    .today-dish-track-controls {
+        width: 100%;
+        justify-content: flex-start;
+    }
+    .today-dish-category-tabs {
+        overflow-x: auto;
+        flex-wrap: nowrap;
+        padding-bottom: 4px;
+    }
+    .today-dish-category-items {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 540px) {
+    .today-dish-category-items {
+        grid-template-columns: 1fr;
+    }
+}

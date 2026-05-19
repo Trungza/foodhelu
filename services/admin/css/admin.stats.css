@@ -1,0 +1,39 @@
+/* ===============================================================
+   STATS CARDS
+================================================================= */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+}
+
+.stat-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    backdrop-filter: blur(12px);
+    border-radius: 18px;
+    padding: 18px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: 0.25s;
+}
+.stat-card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(59, 130, 246, 0.4);
+}
+
+.stat-value {
+    font-size: 22px;
+    font-weight: 750;
+    letter-spacing: 0.2px;
+}
+.stat-label {
+    margin-top: 6px;
+    font-size: 13px;
+    color: var(--muted);
+}
+.stat-icon {
+    font-size: 28px;
+    opacity: 0.6;
+}

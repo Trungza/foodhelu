@@ -1,0 +1,288 @@
+﻿﻿<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FoodieResto - Nhà Hàng Hiện Đại</title>
+    <link rel="stylesheet" href="css/main.css">
+    <!-- Font Awesome Icons (miễn phí) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="css/order-status.css">
+    <!-- Appwrite SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/appwrite@17.0.0"></script>
+</head>
+
+<body>
+    <!-- Header -->
+    <header>
+        <nav>
+            <!-- Logo bên trái -->
+            <div class="logo">
+                <img class="brand-logo" src="img/logo.png" alt="Helu Food" />
+                <span class="brand-text">Helu<span>Food</span></span>
+            </div>
+
+            <!-- Menu ở giữa -->
+            <div class="nav-menu">
+                <a href="#home">Trang chủ</a>
+                <a href="about.html">Về chúng tôi</a>
+                <a href="#menu">Thực đơn</a>
+                <a href="certificates.html">Chứng chỉ</a>
+                <a href="gallery.html">Thư viện ảnh</a>
+            </div>
+
+            <!-- Shop icon bên phải -->
+            <div class="nav-actions">
+                <div class="track-icon" id="openTrackModal" title="Theo dõi đơn hàng">
+                    <i class="fas fa-truck-fast"></i>
+                </div>
+                <div class="shop-icon">
+                    <i class="fas fa-shopping-bag"></i>
+                    <span class="cart-count">0</span>
+                </div>
+            </div>
+        </nav>
+    </header>
+    <div class="floating-social-links" aria-label="Liên kết mạng xã hội">
+        <a href="https://www.facebook.com/p/Ti%E1%BB%87m-C%C6%A1m-V%C4%83n-Ph%C3%B2ng-HELU-Food-100094773815255/" target="_blank" rel="noopener noreferrer" aria-label="Facebook Helu Food">
+            <i class="fab fa-facebook"></i>
+        </a>
+        <a href="https://www.tiktok.com/@tiemcomhelufood" target="_blank" rel="noopener noreferrer" aria-label="TikTok Helu Food">
+            <i class="fab fa-tiktok"></i>
+        </a>
+    </div>
+    <!-- Banner Slider -->
+    <section class="banner-slider" id="bannerSlider">
+        <div class="slider-container">
+            <div class="slider-wrapper" id="sliderWrapper">
+                <!-- Slides sẽ được JavaScript tạo động -->
+            </div>
+
+            <!-- Nút điều hướng -->
+            <button class="slider-arrow prev" id="prevSlide">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <button class="slider-arrow next" id="nextSlide">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+
+            <!-- Dots -->
+            <div class="slider-dots" id="sliderDots" aria-label="Chuyển slide"></div>
+        </div>
+    </section>
+
+    <!-- Menu Section -->
+    <section id="menu" class="menu">
+        <div class="container">
+            <div class="menu-layout">
+                <div class="menu-content">
+                    <h2 class="menu-main-title">COMBO MÓN ĂN</h2>
+                    <div class="menu-slider-wrap">
+                        <button type="button" class="menu-nav-btn menu-nav-side" id="menuPrevBtn"
+                            aria-label="Combo trước">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <div class="menu-grid" id="menuGrid"></div>
+                        <button type="button" class="menu-nav-btn menu-nav-side" id="menuNextBtn"
+                            aria-label="Combo tiếp theo">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                    <div class="menu-pagination" id="menuPagination" hidden>
+                        <div class="menu-dots" id="menuDots" aria-label="Chuyển trang combo"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- All Dishes Menu Section -->
+    <section id="dishes-menu" class="dishes-menu">
+        <div class="container">
+            <div class="dishes-content">
+                <h2 class="dishes-main-title">Thực <span>Đơn</span></h2>
+                <p class="dishes-subtitle">Chọn món yêu thích từ danh sách đa dạng của chúng tôi</p>
+
+                <!-- TABS DANH MỤC -->
+                <div class="dishes-tabs" id="dishesTabs">
+                 
+                </div>
+
+                <!-- Danh sách món ăn -->
+                <div class="dishes-grid" id="dishesGrid">
+                    <!-- Dữ liệu sẽ được JavaScript tạo động -->
+                </div>
+
+                <!-- Loading indicator -->
+                <div class="loading-spinner" id="loadingSpinner" style="display: none;">
+                    <i class="fas fa-spinner fa-spin"></i> Đang tải...
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- Weekly Lunch Menu Section -->
+    <section id="weekly-menu" class="weekly-menu">
+        <div class="container">
+            <div class="weekly-content">
+                <h2 class="weekly-title">Thực Đơn <span>Bữa Trưa Tuần</span></h2>
+                <p class="weekly-subtitle">Chọn bữa trưa cho từng ngày trong tuần</p>
+
+                <!-- TABS CHÍNH THEO NGÀY -->
+                <div class="weekly-tabs" id="weeklyTabs">
+                    <button class="weekly-tab-btn active" data-day="monday">Thứ Hai</button>
+                    <button class="weekly-tab-btn" data-day="tuesday">Thứ Ba</button>
+                    <button class="weekly-tab-btn" data-day="wednesday">Thứ Tư</button>
+                    <button class="weekly-tab-btn" data-day="thursday">Thứ Năm</button>
+                    <button class="weekly-tab-btn" data-day="friday">Thứ Sáu</button>
+                    <button class="weekly-tab-btn" data-day="saturday">Thứ Bảy</button>
+                    <button class="weekly-tab-btn" data-day="sunday">Chủ Nhật</button>
+                </div>
+
+                <div class="weekly-panels" id="weeklyPanels">
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- Cart Modal -->
+
+    <div class="cart-modal" id="cartModal">
+        <div class="cart-modal-content">
+            <div class="cart-modal-header">
+                <h3 id="cartModalTitle">Giỏ hàng</h3>
+                <button class="cart-close" id="cartClose" aria-label="Đóng giỏ hàng">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="cart-modal-body">
+                <!-- Nội dung giỏ hàng -->
+                <div class="cart-items" id="cartItems">
+                    <!-- Sản phẩm sẽ được JavaScript tạo động -->
+                </div>
+
+                <!-- Form thông tin đặt hàng (ẩn ban đầu) -->
+                <div class="checkout-form" id="checkoutForm" style="display: none;">
+                    <h4>Thông tin đặt hàng</h4>
+                    <div class="form-group">
+                        <label>Họ và tên</label>
+                        <input type="text" id="customerName" placeholder="Nhập họ và tên" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label>Số điện thoại</label>
+                        <input type="tel" id="customerPhone" placeholder="Nhập số điện thoại" class="form-input">
+                    </div>
+                    <div class="form-group" style="display: block;width: 100%;">
+                        <label>Địa chỉ giao hàng</label>
+                        <textarea id="customerAddress" placeholder="Nhập địa chỉ giao hàng" class="form-textarea"
+                            rows="3"></textarea>
+                    </div>
+                    <div class="form-group" style="display: block;width: 100%;">
+                        <label>Thời gian giao hàng</label>
+                        <div class="delivery-time-options">
+                            <label class="delivery-time-option">
+                                <input type="radio" name="deliveryTimeType" value="asap" checked>
+                                <span>Giao sớm nhất có thể</span>
+                            </label>
+                            <label class="delivery-time-option">
+                                <input type="radio" name="deliveryTimeType" value="scheduled">
+                                <span>Hẹn giờ giao</span>
+                            </label>
+                            <div class="delivery-time-group" id="deliveryTimeGroup" style="display: none;flex-basis: 50%;">
+                                <label>Chọn ngày giờ giao</label>
+                                <input type="datetime-local" id="customerDeliveryTime" class="form-input">
+                                <p class="delivery-time-hint">Vui lòng chọn thời gian giao sau ít nhất 30 phút kể từ
+                                    hiện tại.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Tổng kết giỏ hàng -->
+                <div class="cart-summary">
+                    <div class="cart-total">
+                        <span>Tổng cộng:</span>
+                        <span class="cart-total-price" id="cartTotalPrice">0đ</span>
+                    </div>
+                    <div class="cart-summary-buttons">
+                        <button class="cart-back-btn" id="backToCartBtn" style="display: none;">Quay lại giỏ
+                            hàng</button>
+                        <button class="cart-submit-btn" id="submitOrderBtn" style="display: none;">Xác nhận đặt
+                            hàng</button>
+                        <button class="cart-checkout-btn" id="checkoutBtn">Tiến hành thanh toán</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Order Status Modal -->
+    <div class="status-modal" id="statusModal">
+        <div class="status-modal-content">
+            <div class="status-modal-header">
+                <h3>Theo dõi đơn hàng</h3>
+                <button class="status-close" id="statusClose">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="status-modal-body">
+                <div class="search-box">
+                    <p>Nhập số điện thoại để kiểm tra trạng thái đơn hàng mới nhất của bạn.</p>
+                    <div class="search-form">
+                        <input type="tel" id="trackPhoneInput" placeholder="Ví dụ: 0987654321" class="form-input">
+                        <button id="btnTrackOrder" class="btn-track">Tìm kiếm</button>
+                    </div>
+                </div>
+                <div id="orderStatusResult" class="order-status-result">
+                    <!-- Kết quả tra cứu sẽ hiển thị ở đây -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-grid">
+                <div>
+                    <h3>Helu<span>Food</span></h3>
+                    <p>Phục vụ những bữa ăn ngon từ năm 2022</p>
+                </div>
+                <div>
+                    <h4>Liên kết nhanh</h4>
+                    <a href="#home">Trang chủ</a>
+                    <a href="#menu">Thực đơn</a>
+                    <a href="about.html">Giới thiệu</a>
+                    <a href="#reservation">Đặt bàn</a>
+                </div>
+                <div>
+                    <h4>Giờ mở cửa</h4>
+                    <p>Thứ Hai - Thứ Sáu: 9:00 - 16:00</p>
+                    <p>Thứ Bảy - Chủ Nhật: 9:00 - 16:00</p>
+                </div>
+                <div>
+                    <h4>Theo dõi chúng tôi</h4>
+                    <div class="social-links">
+                        <a href="https://www.facebook.com/p/Ti%E1%BB%87m-C%C6%A1m-V%C4%83n-Ph%C3%B2ng-HELU-Food-100094773815255/" target="_blank" rel="noopener noreferrer" aria-label="Facebook Helu Food"><i class="fab fa-facebook"></i></a>
+                        <a href="https://www.tiktok.com/@tiemcomhelufood" target="_blank" rel="noopener noreferrer" aria-label="TikTok Helu Food"><i class="fab fa-tiktok"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 Helufood. Bảo lưu mọi quyền.</p>
+            </div>
+        </div>
+    </footer>
+    <script src="js/appwrite.js"></script>
+    <script src="js/header-scroll.js" type="module"></script>
+    <script src="js/menu.js" type="module"></script>
+    <script src="js/dishes.js" type="module"></script>
+    <script src="js/weekly-menu.js" type="module"></script>
+    <script src="js/banner.js" type="module"></script>
+    <script src="js/smooth-scroll.js" type="module"></script>
+    <script src="js/cart-modal.js" type="module"></script>
+    <script src="js/order-status.js" type="module"></script>
+    <script src="js/main.js" type="module"></script>
+</body>
+
+</html>

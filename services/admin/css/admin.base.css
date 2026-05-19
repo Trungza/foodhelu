@@ -1,0 +1,32 @@
+/* ===============================================================
+   GLOBAL & VARIABLES
+================================================================= */
+:root {
+    --primary: #3b82f6;
+    --primary-dark: #2563eb;
+    --success: #10b981;
+    --danger: #ef4444;
+    --warning: #f59e0b;
+
+    --bg: #f8fafc;
+    --card: rgba(255, 255, 255, 0.96);
+    --card-solid: #ffffff;
+    --border: rgba(148, 163, 184, 0.16);
+
+    --text: #0f172a;
+    --muted: #64748b;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: "Plus Jakarta Sans", Inter, system-ui, sans-serif;
+    background:
+        radial-gradient(circle at top, rgba(59, 130, 246, 0.06), transparent 22%),
+        linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+    color: var(--text);
+}

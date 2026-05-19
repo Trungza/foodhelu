@@ -1,0 +1,12 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap');
+
+@import url('theme.css');
+@import url('base.css');
+@import url('header.css');
+@import url('banner.css');
+@import url('dishes.css');
+@import url('menu.css');
+@import url('footer.css');
+@import url('weekly-menu.css');
+@import url('cart-modal.css');

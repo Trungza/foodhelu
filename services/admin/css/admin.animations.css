@@ -1,0 +1,30 @@
+/* ===============================================================
+   ANIMATIONS
+================================================================= */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.loading-shim {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    color: var(--muted, #94a3b8);
+}
+.loading-shim i {
+    font-size: 28px;
+    color: var(--primary, #3b82f6);
+}
+.loading-shim span {
+    font-size: 14px;
+}
+.table-loading-row td {
+    background: transparent;
+}

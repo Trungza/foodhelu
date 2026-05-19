@@ -1,0 +1,412 @@
+/* DISHES.CSS */
+
+.dishes-menu {
+    padding: 92px 0;
+    position: relative;
+    overflow: hidden;
+    background:
+        radial-gradient(circle at 18% 20%, rgba(96, 165, 250, 0.08), transparent 22%),
+        radial-gradient(circle at 82% 28%, rgba(37, 99, 235, 0.06), transparent 24%),
+        linear-gradient(135deg, #ffffff 0%, #fafcff 55%, #f3f7fc 100%);
+}
+
+.dishes-menu::before,
+.dishes-menu::after {
+    content: "";
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+    filter: blur(12px);
+    opacity: 0.8;
+}
+
+.dishes-menu::before {
+    width: 420px;
+    height: 420px;
+    top: 12%;
+    right: -90px;
+    background: radial-gradient(circle, rgba(37, 99, 235, 0.12), transparent 70%);
+}
+
+.dishes-menu::after {
+    width: 360px;
+    height: 360px;
+    bottom: -100px;
+    left: -60px;
+    background: radial-gradient(circle, rgba(37, 99, 235, 0.06), transparent 70%);
+}
+
+.dishes-content {
+    width: 100%;
+    position: relative;
+    z-index: 1;
+    font-family: "Be Vietnam Pro", "Plus Jakarta Sans", "Segoe UI", sans-serif;
+    min-height: 450px;
+}
+
+.dishes-main-title {
+    text-align: center;
+    font-size: 42px;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    color: var(--text-dark);
+    margin-bottom: 12px;
+}
+
+.dishes-main-title span {
+    color: var(--primary-color);
+}
+
+.dishes-subtitle {
+    text-align: center;
+    font-size: 16px;
+    color: var(--text-light);
+    margin-bottom: 34px;
+}
+
+.dishes-tabs {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 26px;
+}
+
+.tab-btn {
+    border: 1px solid rgba(148, 163, 184, 0.16);
+    background: rgba(255, 255, 255, 0.9);
+    color: var(--text-light);
+    border-radius: var(--radius-pill);
+    padding: 10px 18px;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    cursor: pointer;
+    transition: all 0.22s ease;
+    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.05);
+}
+
+.tab-btn:hover,
+.tab-btn.active {
+    color: var(--text-white);
+    border-color: transparent;
+    background: linear-gradient(135deg, var(--primary-color), #60a5fa);
+    transform: translateY(-1px);
+    box-shadow: 0 14px 28px rgba(37, 99, 235, 0.24);
+}
+
+.dishes-grid {
+    display: grid;
+    /* Cố định đúng 2 cột, mỗi cột 380px để luôn là 2 món/hàng và không bị giãn */
+    grid-template-columns: repeat(2, 380px); 
+    gap: 20px;
+    align-items: start;
+    justify-content: center; /* Căn giữa các card trong vùng chứa */
+}
+
+.dish-card {
+    display: flex;
+    align-items: center;
+    padding:0 12px;
+    background: #fff;
+    border-radius: 16px;
+    border: 1px solid #f1f5f9;
+    transition: all 0.3s ease;
+    gap: 16px;
+    position: relative;
+    overflow: hidden;
+    height: 124px; /* Cố định chiều cao */
+    width: 380px; /* Cố định chiều rộng card */
+    box-shadow: 0 12px 20px -5px rgba(0, 0, 0, 0.1), 0 4px 8px -4px rgba(0, 0, 0, 0.05);
+    border: none;
+}
+
+.dish-card:hover {
+    border-color: #2563eb;
+    background: #ffffff;
+    transform: translateY(-6px) scale(1.015);
+    box-shadow: 0 25px 35px -12px rgba(37, 99, 235, 0.25), 0 10px 15px -8px rgba(37, 99, 235, 0.15);
+}
+
+.dish-image {
+    width: 100px;
+    height: 100px;
+    flex-shrink: 0;
+    position: relative;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #e2e8f0; /* Placeholder background */
+}
+
+.dish-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.dish-sold-out-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.dish-info {
+    flex-grow: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.dish-name {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0 0 4px 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.dish-desc {
+    font-size: 0.8rem;
+    color: #64748b;
+    margin: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    line-height: 1.4;
+}
+
+.dish-action-group {
+    position: relative;
+    width: 100px; /* Chiều rộng cố định cho khu vực giá và nút */
+    height: 100%; /* Chiếm toàn bộ chiều cao của card */
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    overflow: hidden;
+    flex-shrink: 0;
+    margin-right: -12px; /* Kéo sát lề phải của card */
+    padding-left: 10px; /* Tạo khoảng trống khi nút trượt ra */
+    background: linear-gradient(to left, #fff 70%, transparent); /* Tạo hiệu ứng fade khi nút trượt */
+}
+
+/* Khối giá và số lượng */
+.dish-price-block {
+    text-align: right;
+    transition: all 0.3s ease;
+    position: absolute; /* Để nút có thể trượt lên trên */
+    right: 0;
+    padding-right: 12px; /* Khoảng cách với mép card */
+}
+
+.dish-price-block .discount-price {
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--primary-color);
+    line-height: 1.1;
+}
+
+.btn-add-cart-icon {
+    border: none;
+    position: absolute; /* Để nút có thể trượt */
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 45px; /* Chiều rộng ban đầu của nút */
+    border-radius: 0 16px 16px 0; /* Bo tròn chỉ cạnh phải */
+    background: #2563eb;
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); /* Hiệu ứng trượt mượt mà */
+    z-index: 2;
+    box-shadow: 0 4px 10px rgba(37, 99, 235, 0.2);
+    white-space: nowrap; /* Ngăn chữ "THÊM" xuống dòng */
+    opacity: 0; 
+    visibility: hidden;
+     transform: translateX(100%);
+}
+
+.btn-add-cart-icon i {
+    font-size: 1.1rem; /* Icon to hơn */
+}
+
+.btn-add-cart-icon .cart-text {
+    opacity: 0;
+    max-width: 0;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    font-weight: 700;
+    font-size: 0.75rem;
+    margin-left: 0;
+}
+
+.dish-card:hover .btn-add-cart-icon {
+    opacity: 1; 
+    visibility: visible;
+    transform: translateX(0);
+    width: 100px; /* Chiều rộng khi hover để che giá */
+    border-radius: 0 16px 16px 0; /* Giữ bo tròn cạnh phải */
+    box-shadow: 0 8px 20px rgba(37, 99, 235, 0.3);
+}
+
+.dish-card:hover .btn-add-cart-icon .cart-text {
+    opacity: 1;
+    max-width: 60px; /* Hiển thị chữ "THÊM" */
+    margin-left: 8px;
+}
+
+.dish-card:hover .dish-price-block {
+    transform: translateX(-30px); /* Dịch chuyển giá sang trái */
+    opacity: 0; /* Ẩn giá */
+}
+
+.btn-add-cart-icon:hover:not(:disabled) {
+    background: #1d4ed8; /* Màu đậm hơn khi hover */
+}
+
+.btn-add-cart-icon:disabled {
+    background: #e2e8f0;
+    color: #94a3b8;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+.dish-sold-out .btn-add-cart-icon {
+    background: #e2e8f0;
+    color: #94a3b8;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+.dish-sold-out .dish-action-group {
+    background: linear-gradient(to left, #f8fafc 70%, transparent); /* Nền cho action group khi hết hàng */
+}
+
+/* Các style cũ không còn dùng */
+.dish-stock-badge { display: none; } /* Thay bằng overlay */
+.dish-category { display: none; } /* Không dùng trong bố cục mới */
+.dish-price-wrapper { display: none; } /* Thay bằng dish-price-block */
+
+/* Responsive */
+@media (max-width: 640px) {
+    .dish-card {
+        gap: 12px;
+        padding: 10px;
+        min-height: 110px;
+    }
+    .dish-image {
+        width: 80px;
+        height: 80px;
+        border-radius: 10px;
+    }
+    .dish-name {
+        font-size: 0.95rem;
+        margin-bottom: 2px;
+    }
+    .dish-desc {
+        font-size: 0.75rem;
+        -webkit-line-clamp: 1; /* Giới hạn 1 dòng trên mobile */
+    }
+    .dish-action-group {
+        width: 80px; /* Nhỏ hơn trên mobile */
+        margin-right: -10px;
+    }
+    .dish-price-block .discount-price {
+        font-size: 0.9rem;
+    }
+    .dish-inventory {
+        font-size: 0.7rem;
+    }
+    .btn-add-cart-icon {
+        width: 40px; /* Nút nhỏ hơn */
+        border-radius: 0 10px 10px 0;
+    }
+    .dish-card:hover .btn-add-cart-icon {
+        width: 80px; /* Chiều rộng khi hover trên mobile */
+        border-radius: 0 10px 10px 0;
+    }
+    .dish-card:hover .btn-add-cart-icon .cart-text {
+        max-width: 40px;
+        margin-left: 6px;
+    }
+    .dish-card:hover .dish-price-block {
+        transform: translateX(-20px);
+    }
+}
+
+@media (max-width: 980px) {
+    .dishes-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 640px) {
+    .dishes-menu {
+        padding: 74px 0;
+    }
+
+    .dishes-main-title {
+        font-size: 34px;
+    }
+
+    .dishes-subtitle {
+        font-size: 14px;
+        margin-bottom: 26px;
+    }
+
+    .dishes-tabs {
+        gap: 8px;
+    }
+
+    .tab-btn {
+        padding: 9px 13px;
+        font-size: 12px;
+    }
+
+    .dishes-grid {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+
+    .dish-info {
+        gap: 0;
+    }
+
+    .dish-name {
+        font-size: 15px;
+    }
+
+    .dish-desc {
+        font-size: 11.5px;
+        min-height: 30px;
+    }
+
+    .dish-price-wrapper .discount-price {
+        font-size: 16px;
+    }
+
+    .dish-stock-badge {
+        top: 4px;
+        right: 4px;
+    }
+
+    .btn-add-dish {
+        min-height: 30px;
+        padding: 6px 10px;
+        font-size: 10px;
+    }
+}

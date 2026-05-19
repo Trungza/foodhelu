@@ -1,0 +1,456 @@
+/* Revenue Statistics Styles */
+
+.revenue-stats-container {
+    padding: 24px;
+    background: #fff;
+    min-height: 100vh;
+}
+
+.stats-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 32px;
+    border-bottom: 2px solid #e2e8f0;
+    padding-bottom: 16px;
+}
+
+.stats-header h2 {
+    font-size: 24px;
+    color: #0f172a;
+    font-weight: 700;
+}
+
+.stats-controls {
+    display: flex;
+    gap: 12px;
+}
+
+.btn-action {
+    padding: 8px 16px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    background: #f8fafc;
+    color: #475569;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-action:hover {
+    background: #2563eb;
+    color: white;
+    border-color: #2563eb;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
+}
+
+.btn-action i {
+    font-size: 16px;
+}
+
+/* Stats Grid */
+.stats-grid {
+    margin-bottom: 48px;
+}
+
+.stats-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 24px;
+    margin-bottom: 24px;
+}
+
+.stats-col {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 24px;
+    transition: all 0.3s ease;
+}
+
+.stats-col:hover {
+    border-color: #2563eb;
+    box-shadow: 0 8px 16px rgba(37, 99, 235, 0.1);
+    transform: translateY(-4px);
+}
+
+.stats-col h3 {
+    font-size: 16px;
+    color: #0f172a;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+}
+
+.stats-col h3 i {
+    font-size: 18px;
+    color: #2563eb;
+}
+
+.stat-card {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 16px;
+    text-align: center;
+}
+
+.stat-label {
+    font-size: 12px;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+    font-weight: 600;
+}
+
+.stat-value {
+    font-size: 28px;
+    font-weight: 700;
+    color: #2563eb;
+    margin-bottom: 12px;
+    word-break: break-word;
+}
+
+.stat-meta {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    font-size: 13px;
+    color: #64748b;
+    flex-wrap: wrap;
+}
+
+.stat-meta span {
+    padding: 4px 8px;
+    background: #f1f5f9;
+    border-radius: 4px;
+}
+
+/* Custom Date Section */
+.custom-date-section {
+    background: #f0f9ff;
+    border: 1px solid #bfdbfe;
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 48px;
+}
+
+.custom-date-section h3 {
+    font-size: 18px;
+    color: #0f172a;
+    margin-bottom: 16px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.custom-date-controls {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.date-input,
+.range-select {
+    padding: 10px 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font-size: 14px;
+    background: white;
+    color: #0f172a;
+    font-family: inherit;
+    cursor: pointer;
+    transition: border-color 0.3s ease;
+}
+
+.date-input:focus,
+.range-select:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.date-input {
+    flex: 1;
+    min-width: 150px;
+}
+
+.range-select {
+    min-width: 120px;
+}
+
+.btn-apply {
+    padding: 10px 24px;
+    background: #2563eb;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+}
+
+.btn-apply:hover {
+    background: #1d4ed8;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+}
+
+.btn-apply:active {
+    transform: translateY(0);
+}
+
+.custom-stats-result {
+    margin-top: 20px;
+}
+
+.custom-stat-card {
+    background: white;
+    border: 2px solid #2563eb;
+    border-radius: 8px;
+    padding: 20px;
+    text-align: center;
+}
+
+.result-label {
+    font-size: 14px;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 12px;
+    font-weight: 600;
+}
+
+.result-value {
+    font-size: 32px;
+    font-weight: 700;
+    color: #059669;
+    margin-bottom: 12px;
+    word-break: break-word;
+}
+
+.result-meta {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    font-size: 13px;
+    color: #64748b;
+    flex-wrap: wrap;
+}
+
+.result-meta span {
+    padding: 6px 12px;
+    background: #f0fdf4;
+    border-radius: 4px;
+    border: 1px solid #dcfce7;
+}
+
+/* Revenue Table Section */
+.revenue-table-section {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 24px;
+}
+
+.revenue-table-section h3 {
+    font-size: 18px;
+    color: #0f172a;
+    margin-bottom: 16px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.table-container {
+    overflow-x: auto;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+}
+
+.revenue-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+}
+
+.revenue-table thead {
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    color: white;
+    font-weight: 600;
+}
+
+.revenue-table th {
+    padding: 14px 16px;
+    text-align: left;
+    font-size: 13px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    border: none;
+    white-space: nowrap;
+}
+
+.revenue-table tbody tr {
+    border-bottom: 1px solid #e2e8f0;
+    transition: background-color 0.2s ease;
+}
+
+.revenue-table tbody tr:hover {
+    background: #f0f9ff;
+}
+
+.revenue-table tbody tr:last-child {
+    border-bottom: none;
+}
+
+.revenue-table td {
+    padding: 14px 16px;
+    font-size: 14px;
+    color: #0f172a;
+}
+
+.revenue-table .price-cell {
+    font-weight: 600;
+    color: #059669;
+    text-align: right;
+}
+
+.revenue-table .empty-cell {
+    text-align: center;
+    color: #94a3b8;
+    padding: 40px 16px;
+    font-style: italic;
+}
+
+/* Print Styles */
+@media print {
+    .revenue-stats-container {
+        padding: 0;
+        background: white;
+    }
+
+    .stats-header {
+        display: none;
+    }
+
+    .btn-action,
+    .custom-date-section,
+    .custom-date-controls {
+        display: none;
+    }
+
+    .stats-col,
+    .revenue-table-section {
+        border: 1px solid #000;
+        page-break-inside: avoid;
+    }
+
+    .revenue-table {
+        width: 100%;
+        margin-top: 20px;
+    }
+
+    .revenue-table th,
+    .revenue-table td {
+        border: 1px solid #000;
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .revenue-stats-container {
+        padding: 16px;
+    }
+
+    .stats-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+    }
+
+    .stats-header h2 {
+        font-size: 20px;
+    }
+
+    .stats-controls {
+        width: 100%;
+        justify-content: flex-start;
+    }
+
+    .stats-row {
+        grid-template-columns: 1fr;
+    }
+
+    .custom-date-controls {
+        flex-direction: column;
+    }
+
+    .date-input,
+    .range-select,
+    .btn-apply {
+        width: 100%;
+    }
+
+    .stat-meta,
+    .result-meta {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .revenue-table-section {
+        padding: 16px;
+    }
+
+    .revenue-table th,
+    .revenue-table td {
+        padding: 10px 8px;
+        font-size: 12px;
+    }
+
+    .table-container {
+        -webkit-overflow-scrolling: touch;
+    }
+}
+
+@media (max-width: 480px) {
+    .stats-header h2 {
+        font-size: 18px;
+    }
+
+    .stat-value,
+    .result-value {
+        font-size: 20px;
+    }
+
+    .stats-col {
+        padding: 16px;
+    }
+
+    .btn-action {
+        flex: 1;
+        justify-content: center;
+        padding: 10px;
+    }
+
+    .btn-action span {
+        display: none;
+    }
+
+    .btn-action i {
+        font-size: 18px;
+    }
+}

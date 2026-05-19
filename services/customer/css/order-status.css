@@ -1,0 +1,208 @@
+.nav-actions {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.track-icon {
+    font-size: 22px;
+    color: var(--text-dark);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.track-icon:hover {
+    color: var(--primary-color);
+    transform: translateY(-2px);
+}
+
+/* Hiệu ứng Pulse khi vừa đặt hàng xong */
+.track-icon.pulse {
+    animation: trackPulse 2s infinite ease-in-out;
+    color: var(--primary-color);
+}
+
+@keyframes trackPulse {
+    0% { transform: scale(1); filter: drop-shadow(0 0 0 rgba(37, 99, 235, 0)); }
+    50% { transform: scale(1.3); filter: drop-shadow(0 0 8px rgba(37, 99, 235, 0.6)); }
+    100% { transform: scale(1); filter: drop-shadow(0 0 0 rgba(37, 99, 235, 0)); }
+}
+
+.status-modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.4);
+    backdrop-filter: blur(8px);
+    z-index: 10000;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+.status-modal.active {
+    display: flex;
+}
+
+.status-modal-content {
+    width: 100%;
+    max-width: 500px;
+    background: #ffffff;
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    animation: slideUp 0.4s ease;
+}
+
+@keyframes slideUp {
+    from { transform: translateY(30px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+.status-modal-header {
+    padding: 20px 24px;
+    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.status-modal-header h3 { margin: 0; font-size: 20px; }
+
+.status-close {
+    background: none; border: none; font-size: 20px; cursor: pointer; color: #64748b;
+}
+
+.status-modal-body { padding: 24px; }
+
+.search-box p { font-size: 14px; color: #64748b; margin-bottom: 15px; }
+
+.search-form { display: flex; gap: 10px; }
+
+.btn-track {
+    background: var(--primary-color);
+    color: white; border: none; padding: 0 20px;
+    border-radius: 12px; font-weight: 600; cursor: pointer;
+}
+
+.order-status-result { margin-top: 24px; max-height: 350px; overflow-y: auto; }
+
+.track-item {
+    padding: 16px; border: 1px solid #e2e8f0;
+    border-radius: 20px; margin-bottom: 16px;
+    background: #f8fafc;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.track-item-header {
+    display: flex; justify-content: space-between;
+    margin-bottom: 15px; font-size: 13px;
+    padding-bottom: 10px;
+    border-bottom: 1px dashed #e2e8f0;
+}
+
+/* Timeline Styling */
+.track-timeline {
+    display: flex;
+    justify-content: space-between;
+    margin: 20px 0;
+    position: relative;
+    padding: 0 10px;
+}
+
+.track-timeline::before {
+    content: '';
+    position: absolute;
+    top: 12px;
+    left: 40px;
+    right: 40px;
+    height: 2px;
+    background: #e2e8f0;
+    z-index: 1;
+}
+
+.timeline-step {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+}
+
+.step-dot {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: #fff;
+    border: 2px solid #cbd5e1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    color: #cbd5e1;
+    transition: all 0.3s ease;
+}
+
+.step-label {
+    font-size: 11px;
+    color: #94a3b8;
+    text-align: center;
+    font-weight: 500;
+}
+
+.timeline-step.active .step-dot {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+    color: white;
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15);
+}
+
+.timeline-step.active .step-label { color: var(--primary-color); font-weight: 700; }
+
+
+.track-id { font-weight: 700; color: var(--primary-color); }
+
+.track-status-badge {
+    padding: 4px 12px; border-radius: 20px;
+    font-size: 12px; font-weight: 700;
+}
+
+/* Màu sắc trạng thái khách hàng */
+.status-customer-pending { background: #fef3c7; color: #92400e; } /* Chờ xử lý */
+.status-customer-cooking { background: #dcfce7; color: #166534; } /* Bếp đang nấu */
+.status-customer-delivery { background: #dbeafe; color: #1e40af; } /* Đang giao */
+.status-customer-cancelled { background: #fee2e2; color: #991b1b; } /* Đã hủy */
+
+.track-customer-detail {
+    background: white;
+    padding: 12px;
+    border-radius: 12px;
+    margin-bottom: 12px;
+    font-size: 13px;
+}
+
+.track-customer-detail div { margin-bottom: 4px; color: #475569; }
+.track-customer-detail strong { color: #0f172a; }
+
+.track-items-summary {
+    font-size: 13px;
+    padding: 10px 0;
+}
+
+.track-info { font-size: 14px; line-height: 1.6; }
+.track-info div { margin-bottom: 4px; }
+
+.loading-status { text-align: center; padding: 20px; color: #64748b; }
+
+/* Responsive */
+@media (max-width: 480px) {
+    .search-form { flex-direction: column; }
+    .btn-track { padding: 12px; }
+    .nav-actions { gap: 10px; }
+    .track-icon { font-size: 20px; }
+    .brand-text { display: none; } /* Ẩn chữ logo nếu quá chật trên mobile */
+}

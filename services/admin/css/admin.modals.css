@@ -1,0 +1,383 @@
+/* ===============================================================
+   MODALS
+================================================================= */
+.modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(255, 255, 255, 0.86);
+    backdrop-filter: blur(8px);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 99999999;
+    padding: 20px;
+}
+
+.modal.active {
+    display: flex;
+}
+
+.modal-content {
+    width: 360px;
+    background: #ffffff;
+    padding: 20px;
+    border-radius: 16px;
+    border: 1px solid rgba(148, 163, 184, 0.18);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.modal-content-wide {
+    width: 520px;
+}
+
+.modal-content-menu {
+    width: min(100%, 560px);
+    max-height: calc(100vh - 40px);
+    max-height: calc(100dvh - 40px);
+    padding: 0;
+    gap: 0;
+    border-radius: 16px;
+    overflow: hidden;
+    background: #ffffff;
+    box-shadow: 0 24px 60px rgba(15, 23, 42, 0.14);
+}
+
+.modal-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 18px 20px 14px;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.16);
+}
+
+.modal-head h3 {
+    font-size: 20px;
+    line-height: 1.2;
+}
+
+.menu-modal-body {
+    display: block;
+    padding: 16px 20px;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.menu-modal-body input,
+.menu-modal-body select,
+.menu-modal-body textarea {
+    display: inline-block;
+    width: 48%;
+    padding: 11px 12px;
+    border-radius: 10px;
+    border: 1px solid rgba(148, 163, 184, 0.14);
+    background: rgba(255, 255, 255, 0.96);
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.menu-modal-body textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+.dish-form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    align-items: start;
+}
+
+.dish-span-2 {
+    grid-column: 1 / -1;
+}
+
+.dish-form-grid #dishDesc {
+    min-height: 74px;
+}
+
+.menu-modal-body input:focus,
+.menu-modal-body select:focus,
+.menu-modal-body textarea:focus {
+    border-color: rgba(59, 130, 246, 0.55);
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.12);
+    background: #ffffff;
+}
+
+.menu-modal-body label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 11px 12px;
+    border-radius: 10px;
+    border: 1px solid rgba(148, 163, 184, 0.12);
+    background: rgba(248, 250, 252, 0.96);
+    color: var(--text);
+    font-size: 13px;
+}
+
+.menu-modal-body label input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    padding: 0;
+    accent-color: var(--primary);
+}
+
+.menu-modal-body input[type="file"] {
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.96);
+    cursor: pointer;
+}
+
+.dish-image-preview-wrap {
+    display: grid;
+    gap: 8px;
+    min-width: 0;
+}
+
+.dish-image-preview-title {
+    color: var(--muted);
+    font-size: 13px;
+}
+
+.dish-image-preview-box {
+    width: 100%;
+    min-height: 120px;
+    max-height: 140px;
+    border-radius: 12px;
+    border: 1px dashed rgba(148, 163, 184, 0.35);
+    background: rgba(248, 250, 252, 0.96);
+    color: inherit;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    padding: 8px;
+    position: relative;
+    cursor: pointer;
+    outline: none;
+    appearance: none;
+    -webkit-appearance: none;
+}
+
+.dish-image-preview-box:hover {
+    border-color: rgba(59, 130, 246, 0.5);
+}
+
+.dish-image-preview-box:focus-visible {
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2);
+}
+
+.dish-image-preview-box.has-image {
+    border-style: solid;
+}
+
+.dish-image-preview-box.has-image .dish-image-placeholder {
+    display: none !important;
+}
+
+.dish-image-preview-box:not(.has-image) .dish-image-change-badge {
+    display: none !important;
+}
+
+.dish-image-preview {
+    width: 100%;
+    max-height: 124px;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+.dish-available-label {
+    margin: 0;
+}
+
+.dish-image-placeholder {
+    display: grid;
+    gap: 6px;
+    justify-items: center;
+    align-items: center;
+    color: #64748b;
+    font-size: 13px;
+    text-align: center;
+}
+
+.dish-image-placeholder i {
+    font-size: 20px;
+}
+
+.dish-image-change-badge {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 28px;
+    height: 28px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.96);
+    border: 1px solid rgba(148, 163, 184, 0.22);
+    color: var(--text);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+}
+
+.menu-modal-body input::placeholder,
+.menu-modal-body textarea::placeholder {
+    color: #64748b;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 14px 20px 18px;
+    margin-top: 0;
+    border-top: 1px solid rgba(148, 163, 184, 0.16);
+}
+
+.modal-actions .btn-primary,
+.modal-actions .btn-secondary {
+    border-radius: 10px;
+    padding: 9px 14px;
+}
+
+/* ========== MODAL CHI TIẾT ĐƠN HÀNG ========== */
+#orderModal .modal-content {
+    max-width: 650px;
+    width: 90%;
+    background: #ffffff;
+    border-radius: 24px;
+    box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.14);
+    border: 1px solid rgba(148, 163, 184, 0.18);
+    padding: 0;
+    overflow: hidden;
+}
+
+#orderModal .modal-head {
+    background: rgba(59, 130, 246, 0.08);
+    padding: 20px 24px;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.16);
+}
+
+#orderModal .modal-head h3 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 0;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+#orderModal .modal-head h3::before {
+    content: "📋";
+    font-size: 1.3rem;
+}
+
+#orderModal .modal-close {
+    width: 32px;
+    height: 32px;
+    border-radius: 40px;
+    background: rgba(255, 255, 255, 0.96);
+    color: var(--muted);
+    transition: all 0.2s;
+}
+
+#orderModal .modal-close:hover {
+    background: rgba(239, 68, 68, 0.2);
+    color: #ef4444;
+    transform: rotate(90deg);
+}
+
+#orderDetailContent {
+    padding: 24px;
+    max-height: 70vh;
+    overflow-y: auto;
+    scrollbar-width: thin;
+}
+
+#orderDetailContent p {
+    margin: 12px 0;
+    font-size: 14px;
+    line-height: 1.5;
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+#orderDetailContent p b {
+    min-width: 110px;
+    color: var(--muted);
+    font-weight: 500;
+}
+
+#orderDetailContent hr {
+    margin: 20px 0;
+    border-color: rgba(148, 163, 184, 0.16);
+}
+
+#orderDetailContent ul, #orderDetailContent .combo-items-list {
+    margin: 12px 0 0 20px;
+    list-style: none;
+    padding: 0;
+}
+
+#orderDetailContent li, #orderDetailContent .combo-item {
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 12px;
+    background: rgba(248, 250, 252, 0.96);
+    border-radius: 12px;
+    transition: 0.2s;
+}
+
+#orderDetailContent li:hover, #orderDetailContent .combo-item:hover {
+    background: rgba(59, 130, 246, 0.1);
+}
+
+#orderDetailContent .combo-item-detail {
+    margin-left: 24px;
+    border-left: 2px solid rgba(59, 130, 246, 0.3);
+    padding-left: 16px;
+}
+
+/* Badge trạng thái trong modal */
+#orderStatusSelect {
+    background: rgba(255, 255, 255, 0.96);
+    border: 1px solid rgba(148, 163, 184, 0.18);
+    border-radius: 20px;
+    padding: 6px 12px;
+    font-size: 13px;
+    color: var(--text);
+    cursor: pointer;
+    outline: none;
+}
+
+#orderStatusSelect:hover {
+    border-color: #3b82f6;
+}
+
+/* Ảnh món nhỏ trong modal */
+.order-dish-thumb {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    object-fit: cover;
+    background: #e2e8f0;
+}
+
+/* Tổng tiền nổi bật */
+#orderDetailContent p:has(b:contains("Tổng tiền")) {
+    font-size: 18px;
+    font-weight: 600;
+    color: #3b82f6;
+    border-top: 1px dashed rgba(148, 163, 184, 0.16);
+    padding-top: 12px;
+    margin-top: 16px;
+}

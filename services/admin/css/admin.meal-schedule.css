@@ -1,0 +1,525 @@
+.meal-schedule-card {
+    --meal-thumb-size: 36px;
+    background: transparent;
+    border: none;
+    padding: 8px 0 0;
+}
+
+.meal-schedule-card .table-header {
+    position: relative;
+    padding: 0 0 8px;
+    margin-bottom: 6px;
+    border: none;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.meal-schedule-card .table-header h3 {
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--text);
+}
+
+.meal-schedule-actions {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.meal-schedule-draft-btn,
+.meal-schedule-publish-btn {
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background: transparent;
+    color: var(--text);
+    font-size: 12px;
+    line-height: 1.2;
+    padding: 4px 8px;
+    cursor: pointer;
+}
+
+.meal-schedule-draft-btn:hover,
+.meal-schedule-publish-btn:hover {
+    border-color: rgba(148, 163, 184, 0.55);
+    color: var(--text);
+}
+
+.meal-schedule-draft-btn[disabled],
+.meal-schedule-publish-btn[disabled] {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.meal-week-tabs-shell {
+    margin: 4px 0 8px;
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    padding: 0;
+}
+
+.meal-week-tabs {
+    display: flex;
+    gap: 16px;
+    padding: 6px 0 8px;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    border-bottom: 1px solid var(--border);
+}
+
+.meal-week-tab-btn {
+    border: none;
+    border-radius: 0;
+    padding: 7px 0;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s;
+    position: relative;
+}
+
+.meal-week-tab-btn:hover,
+.meal-week-tab-btn.active {
+    color: var(--primary);
+}
+
+.meal-week-tab-btn.active::after {
+    content: "";
+    position: absolute;
+    bottom: -11px;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: var(--primary);
+}
+
+.meal-week-panel {
+    display: none;
+    border: none;
+    background: transparent;
+    padding: 6px 0 0;
+}
+
+.meal-week-panel.active {
+    display: block;
+}
+
+.meal-week-panels {
+    min-width: 0;
+}
+
+.meal-config-layout {
+    display: grid;
+    grid-template-columns: 180px minmax(0, 1fr);
+    gap: 12px;
+}
+
+.meal-category-nav {
+    display: grid;
+    gap: 4px;
+    border: none;
+    border-right: 1px solid var(--border);
+    padding: 2px 8px 2px 0;
+    max-height: 320px;
+    overflow: auto;
+    background: transparent;
+}
+
+.meal-category-nav-item {
+    width: 100%;
+    text-align: left;
+    border: none;
+    border-radius: 0;
+    padding: 6px 2px;
+    background: transparent;
+    color: var(--muted);
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.meal-category-nav-item.active,
+.meal-category-nav-item:hover {
+    color: var(--text);
+}
+
+.meal-category-workspace {
+    border: none;
+    padding: 0;
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.meal-add-dish-btn {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 18px;
+    height: 18px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background: transparent;
+    color: var(--text);
+    font-size: 11px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    cursor: pointer;
+}
+
+.meal-add-combo-btn {
+    position: absolute;
+    top: 0;
+    right: 0;
+    border: none;
+    border-bottom: 1px solid var(--border);
+    border-radius: 0;
+    background: transparent;
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.2;
+    padding: 1px 0;
+    cursor: pointer;
+}
+
+.meal-add-dish-btn:hover,
+.meal-add-combo-btn:hover {
+    color: var(--text);
+    border-color: rgba(148, 163, 184, 0.55);
+}
+
+.meal-picked-dishes,
+.meal-picked-combos {
+    width: calc(100% - 24px);
+}
+
+.meal-picked-combos {
+    margin-top: 4px;
+}
+
+.meal-picked-title {
+    color: var(--muted);
+    font-size: 12px;
+    margin-bottom: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.meal-picked-list,
+.meal-combo-list,
+.meal-dish-picker-list,
+.meal-combo-picker-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 8px;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.meal-picked-card,
+.meal-combo-card,
+.meal-dish-option,
+.meal-combo-option {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.meal-picked-card,
+.meal-combo-card,
+.meal-dish-option,
+.meal-combo-option {
+    padding: 8px;
+}
+
+.meal-picked-card {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.meal-picked-thumb-wrap,
+.meal-combo-item-thumb-wrap,
+.meal-combo-option-thumb-wrap,
+.meal-dish-option-thumb-wrap {
+    width: var(--meal-thumb-size);
+    height: var(--meal-thumb-size);
+    border-radius: 4px;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.04);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.meal-combo-item-thumb-wrap {
+    width: 20px;
+    height: 20px;
+}
+
+.meal-picked-thumb,
+.meal-combo-item-thumb,
+.meal-combo-option-thumb,
+.meal-dish-option-thumb {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.meal-picked-no-thumb,
+.meal-combo-item-no-thumb,
+.meal-combo-option-no-thumb,
+.meal-dish-option-no-thumb {
+    color: var(--muted);
+    font-size: 10px;
+}
+
+.meal-picked-meta,
+.meal-dish-option-meta {
+    min-width: 0;
+    display: grid;
+    gap: 2px;
+}
+
+.meal-picked-meta strong,
+.meal-combo-head strong,
+.meal-combo-item-name,
+.meal-combo-option-name,
+.meal-dish-option-meta strong {
+    color: var(--text);
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.meal-picked-price-row,
+.meal-combo-price-row {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.meal-picked-price-label {
+    color: var(--muted);
+    font-size: 12px;
+}
+
+.meal-picked-price-input,
+.meal-combo-price-input,
+.meal-combo-name-input,
+.meal-combo-price-input-main {
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background: transparent;
+    color: var(--text);
+    font-size: 13px;
+    padding: 3px 5px;
+    outline: none;
+}
+
+.meal-picked-price-input,
+.meal-combo-price-input {
+    width: 100%;
+    max-width: 98px;
+}
+
+.meal-combo-name-input,
+.meal-combo-price-input-main {
+    width: 100%;
+    max-width: 260px;
+}
+
+.meal-picked-price-input:focus,
+.meal-combo-price-input:focus,
+.meal-combo-name-input:focus,
+.meal-combo-price-input-main:focus {
+    border-color: rgba(148, 163, 184, 0.55);
+}
+
+.meal-picked-price-note,
+.meal-combo-items,
+.meal-combo-price-text,
+.meal-combo-option-price,
+.meal-dish-option-meta span,
+.meal-combo-helper,
+.meal-combo-items-empty,
+.meal-empty-dishes {
+    color: var(--muted);
+    font-size: 12px;
+}
+
+.meal-combo-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+}
+
+.meal-combo-remove-btn {
+    width: 16px;
+    height: 16px;
+    border: none;
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    line-height: 1;
+    font-size: 14px;
+}
+
+.meal-combo-remove-btn:hover {
+    color: var(--text);
+}
+
+.meal-dish-remove-btn {
+    width: 16px;
+    height: 16px;
+    border: none;
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    line-height: 1;
+    font-size: 14px;
+    margin-left: auto;
+}
+
+.meal-dish-remove-btn:hover {
+    color: var(--text);
+}
+
+.meal-combo-item-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 4px;
+}
+
+.meal-combo-item {
+    display: grid;
+    grid-template-columns: 20px minmax(0, 1fr);
+    gap: 6px;
+    align-items: center;
+}
+
+.meal-dish-picker-modal {
+    width: min(100%, 820px);
+}
+
+.meal-dish-picker-list,
+.meal-combo-picker-list {
+    max-height: 400px;
+    overflow: auto;
+}
+
+.meal-dish-option {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+    cursor: pointer;
+}
+
+.meal-dish-option-main {
+    min-width: 0;
+    display: grid;
+    grid-template-columns: var(--meal-thumb-size) minmax(0, 1fr);
+    gap: 8px;
+    align-items: center;
+}
+
+.meal-dish-option-indicator {
+    width: 14px;
+    height: 14px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: transparent;
+    font-size: 11px;
+}
+
+.meal-dish-option.active,
+.meal-combo-option.is-selected,
+.meal-dish-option:hover {
+    border-color: rgba(148, 163, 184, 0.55);
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.meal-dish-option.active .meal-dish-option-indicator {
+    color: var(--text);
+}
+
+.meal-combo-modal-body,
+.meal-combo-form-row {
+    display: grid;
+    gap: 5px;
+}
+
+.meal-combo-builder-modal {
+    width: min(100%, 980px);
+}
+
+.meal-combo-category-tabs {
+    display: flex;
+    gap: 10px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 8px;
+    margin-bottom: 8px;
+    overflow-x: auto;
+}
+
+.meal-combo-category-tab {
+    border: none;
+    background: transparent;
+    color: var(--muted);
+    font-size: 13px;
+    padding: 2px 0;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.meal-combo-category-tab.active {
+    color: var(--text);
+    border-bottom: 1px solid var(--text);
+}
+
+.meal-combo-category-panel {
+    display: none;
+}
+
+.meal-combo-category-panel.active {
+    display: block;
+}
+
+.meal-combo-form-row label {
+    color: var(--muted);
+    font-size: 12px;
+}
+
+.meal-combo-option {
+    display: grid;
+    grid-template-columns: auto var(--meal-thumb-size) minmax(0, 1fr) auto;
+    gap: 7px;
+    align-items: center;
+}
+
+.meal-combo-select-input {
+    width: 13px;
+    height: 13px;
+    accent-color: #94a3b8;
+}
+
+.meal-combo-picker-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}

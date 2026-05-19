@@ -1,0 +1,62 @@
+/* ===============================================================
+   LAYOUT & SHELL
+================================================================= */
+.dashboard-shell {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 24px;
+}
+
+.admin-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 28px;
+    padding: 18px 22px;
+    background: var(--card);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+}
+
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* ===============================================================
+   TYPOGRAPHY
+================================================================= */
+.admin-header h1 {
+    font-size: 22px;
+    font-weight: 700;
+}
+
+.admin-header p {
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 4px;
+}
+
+.user-chip {
+    background: rgba(59, 130, 246, 0.15);
+    color: var(--primary);
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 13px;
+    max-width: 420px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.admin-header h1,
+.menu-toolbar-copy h2,
+.admin-section-header h3,
+.table-header h3,
+.menu-toolbar-stat strong,
+.entity-cell strong,
+.price-text {
+    color: var(--text);
+}

@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thư viện ảnh - Helu Food</title>
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/gallery.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/appwrite@17.0.0"></script>
+</head>
+
+<body>
+    <header>
+        <nav>
+            <div class="logo">
+                <img class="brand-logo" src="img/logo.png" alt="Helu Food" />
+                <span class="brand-text">Helu<span>Food</span></span>
+            </div>
+
+            <div class="nav-menu">
+                <a href="index.html">Trang chủ</a>
+                <a href="about.html">Về chúng tôi</a>
+                <a href="index.html#menu">Thực đơn</a>
+                <a href="certificates.html">Chứng chỉ</a>
+                <a href="gallery.html" class="active">Thư viện ảnh</a>
+            </div>
+
+            <div class="shop-icon">
+                <i class="fas fa-shopping-bag"></i>
+                <span class="cart-count">0</span>
+            </div>
+        </nav>
+    </header>
+
+    <div class="floating-social-links" aria-label="Liên kết mạng xã hội">
+        <a href="https://www.facebook.com/p/Ti%E1%BB%87m-C%C6%A1m-V%C4%83n-Ph%C3%B2ng-HELU-Food-100094773815255/" target="_blank" rel="noopener noreferrer" aria-label="Facebook Helu Food">
+            <i class="fab fa-facebook"></i>
+        </a>
+        <a href="https://www.tiktok.com/@tiemcomhelufood" target="_blank" rel="noopener noreferrer" aria-label="TikTok Helu Food">
+            <i class="fab fa-tiktok"></i>
+        </a>
+    </div>
+
+    <main class="gallery-page">
+        <section class="gallery-hero">
+            <div class="container">
+                <p class="gallery-eyebrow"></p>
+                <center><h1>Thư viện ảnh & video</h1></center>
+                <p class="gallery-intro">Lưu lại những khoảnh khắc món ăn, bếp, giao hàng và hoạt động thực tế của Helu Food.</p>
+                <div class="gallery-stats" id="galleryStats">
+                    <div class="gallery-stat"><strong id="galleryCountAll">0</strong><span>Tổng mục</span></div>
+                    <div class="gallery-stat"><strong id="galleryCountImages">0</strong><span>Ảnh</span></div>
+                    <div class="gallery-stat"><strong id="galleryCountVideos">0</strong><span>Video</span></div>
+                </div>
+            </div>
+        </section>
+
+        <section class="gallery-section">
+            <div class="container">
+                <div class="gallery-toolbar">
+                    <div>
+                        <h2>Bộ sưu tập</h2>
+                        <p>Chọn loại nội dung để xem nhanh.</p>
+                    </div>
+                    <div class="gallery-filters" id="galleryFilters"></div>
+                </div>
+
+                <div class="gallery-grid" id="galleryGrid">
+                    <div class="gallery-loading">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <span>Đang tải thư viện...</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <div class="gallery-lightbox" id="galleryLightbox" hidden>
+        <button class="gallery-lightbox-close" id="galleryLightboxClose" aria-label="Đóng">×</button>
+        <div class="gallery-lightbox-content" id="galleryLightboxContent"></div>
+    </div>
+
+    <footer>
+        <div class="container">
+            <div class="footer-grid">
+                <div>
+                    <h3>Helu<span>Food</span></h3>
+                    <p>Phục vụ những bữa ăn ngon từ năm 2022</p>
+                </div>
+                <div>
+                    <h4>Liên kết nhanh</h4>
+                    <a href="index.html">Trang chủ</a>
+                    <a href="index.html#menu">Thực đơn</a>
+                    <a href="about.html">Giới thiệu</a>
+                    <a href="certificates.html">Chứng chỉ</a>
+                </div>
+                <div>
+                    <h4>Giờ mở cửa</h4>
+                    <p>Thứ Hai - Thứ Sáu: 9:00 - 16:00</p>
+                    <p>Thứ Bảy - Chủ Nhật: 9:00 - 16:00</p>
+                </div>
+                <div>
+                    <h4>Theo dõi chúng tôi</h4>
+                    <div class="social-links">
+                        <a href="https://www.facebook.com/p/Ti%E1%BB%87m-C%C6%A1m-V%C4%83n-Ph%C3%B2ng-HELU-Food-100094773815255/" target="_blank" rel="noopener noreferrer" aria-label="Facebook Helu Food"><i class="fab fa-facebook"></i></a>
+                        <a href="https://www.tiktok.com/@tiemcomhelufood" target="_blank" rel="noopener noreferrer" aria-label="TikTok Helu Food"><i class="fab fa-tiktok"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 Helufood. Bảo lưu mọi quyền.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/header-scroll.js" type="module"></script>
+    <script src="js/smooth-scroll.js" type="module"></script>
+    <script src="js/gallery.js" type="module"></script>
+</body>
+
+</html>

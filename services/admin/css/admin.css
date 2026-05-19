@@ -1,0 +1,14 @@
+/* Admin styles entrypoint (split from the old monolith). */
+@import "./admin.base.css";
+@import "./admin.animations.css";
+@import "./admin.layout.css";
+@import "./admin.buttons.css";
+@import "./admin.stats.css";
+@import "./admin.tables.css";
+@import "./admin.filters-tabs.css";
+@import "./admin.menu-manager.css";
+@import "./admin.meal-schedule.css";
+@import "./admin.pagination.css";
+@import "./admin.modals.css";
+@import "./admin.toast.css";
+@import "./admin.responsive.css";
