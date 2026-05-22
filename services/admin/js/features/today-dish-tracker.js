@@ -15,6 +15,15 @@ const DAY_LABELS = {
     sun: "Chủ nhật"
 };
 
+const PANEL_LOADER_HTML = `
+    <div class="panel-loader-overlay">
+        <div class="loader-wrapper-small">
+            <div class="loader-spinner-small"></div>
+            <img src="../customer/img/logo.png" class="loader-logo-small" alt="Logo" onerror="this.style.display='none'">
+        </div>
+    </div>
+`;
+
 function escapeHtml(value) {
     if (!value) return "";
     return String(value).replace(/[&<>]/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[char]));
@@ -53,6 +62,7 @@ function getStorageKey(dateKey) {
 }
 
 let lastPersistedHash = "";
+const lastSyncedItemData = new Map(); // Cache để kiểm tra thay đổi từng món (dishId:dateKey -> hash)
 
 function calculateStateHash(state) {
     const items = state.items || [];
@@ -285,7 +295,12 @@ function renderOrdersPanel(root, state) {
         const syncLabel = state.lastSyncedAt
             ? `Đồng bộ ${new Date(state.lastSyncedAt).toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit", second: "2-digit" })}`
             : "Chưa đồng bộ đơn";
-        metaHost.textContent = `${formatDayLabel()} | ${syncLabel}`;
+        metaHost.innerHTML = `
+            <span>${formatDayLabel()} | ${syncLabel}</span>
+            <button type="button" class="today-dish-refresh-btn" title="Tải lại thực đơn">
+                <i class="fas fa-sync-alt"></i>
+            </button>
+        `;
     }
 
     const items = state.items || [];
@@ -389,14 +404,24 @@ async function persistStateToDailyStock(state) {
 
     if (!items.length) return;
 
+    // 1. Kiểm tra nhanh toàn bộ state: Nếu hash không đổi thì không cần làm gì
     const currentHash = calculateStateHash(state);
     if (currentHash === lastPersistedHash) return;
 
-    for (const item of items) {
+    // 2. Tối ưu: Chạy song song (Promise.all) và chỉ thực hiện API call cho những món có thay đổi dữ liệu
+    const promises = items.map(async (item) => {
         const soldAutoQty = toSafeInt(item.autoSoldQty, 0);
         const soldAdjustQty = toSafeInt(item.soldAdjustQty, 0);
         const remainingQty = getRemainingQty(item);
         const openingQty = soldAutoQty + soldAdjustQty + remainingQty;
+        const isAvailable = remainingQty > 0;
+
+        // Dirty check: Tạo hash cho dữ liệu quan trọng của món này
+        const itemKey = `${item.id}:${dateKey}`;
+        const itemDataHash = `${openingQty}|${soldAutoQty}|${soldAdjustQty}|${remainingQty}|${isAvailable}`;
+
+        // Nếu dữ liệu món này trùng với lần đồng bộ trước đó thì bỏ qua để giảm API call
+        if (lastSyncedItemData.get(itemKey) === itemDataHash) return;
 
         try {
             await upsertDailyDishStock({
@@ -410,13 +435,16 @@ async function persistStateToDailyStock(state) {
                 soldAutoQty,
                 soldAdjustQty,
                 remainingQty,
-                isAvailable: remainingQty > 0
+                isAvailable
             });
-            await new Promise(resolve => setTimeout(resolve, 100));
+            // Lưu lại hash sau khi sync thành công
+            lastSyncedItemData.set(itemKey, itemDataHash);
         } catch (error) {
             console.warn(`Không thể đồng bộ món ${item.id}:`, error);
         }
-    }
+    });
+
+    await Promise.all(promises);
     lastPersistedHash = currentHash;
 }
 
@@ -542,7 +570,12 @@ let debounceTimer = null;
 export async function initTodayDishTracker(root) {
     const ordersHost = root.querySelector("#todayDishOrdersList");
     if (!ordersHost) return;
-    if (root.dataset.todayDishTrackerInit === "1") return;
+
+    // Hiển thị hiệu ứng loading cục bộ cho bảng danh sách
+    ordersHost.style.position = 'relative';
+    ordersHost.insertAdjacentHTML('afterbegin', PANEL_LOADER_HTML);
+
+    const skipListeners = root.dataset.todayDishTrackerInit === "1";
     root.dataset.todayDishTrackerInit = "1";
 
     const now = new Date();
@@ -576,6 +609,13 @@ export async function initTodayDishTracker(root) {
 
             if (relevantDailyStocks.length > 0) {
                 state.items = mergeWithDailyStock(scheduleItems, relevantDailyStocksById);
+                
+                // Khởi tạo cache từ dữ liệu DB vừa tải để tránh việc persist lại ngay lập tức
+                relevantDailyStocks.forEach(stock => {
+                    const itemKey = `${stock.dishId}:${dateKey}`;
+                    const hash = `${stock.openingQty}|${stock.soldAutoQty}|${stock.soldAdjustQty}|${stock.remainingQty}|${stock.isAvailable}`;
+                    lastSyncedItemData.set(itemKey, hash);
+                });
             } else {
                 state.items = mergeWithPersisted(scheduleItems, persistedState);
             }
@@ -586,6 +626,9 @@ export async function initTodayDishTracker(root) {
     } catch (error) {
         console.error("Không tải được lịch món hôm nay:", error);
         state.items = persistedState?.items || [];
+    } finally {
+        const loader = ordersHost.querySelector('.panel-loader-overlay');
+        if (loader) loader.remove();
     }
 
     const syncOrdersAndRender = async () => {
@@ -607,6 +650,67 @@ export async function initTodayDishTracker(root) {
     saveTrackerState(state);
     renderAll(root, state);
     await syncOrdersAndRender();
+
+    if (skipListeners) return;
+
+    // Xử lý nút Tải lại thủ công
+    root.addEventListener("click", async (event) => {
+        const refreshBtn = event.target.closest(".today-dish-refresh-btn");
+        if (refreshBtn) {
+            try {
+                refreshBtn.classList.add("spinning");
+                // Hiện hiệu ứng loading khi tải lại thủ công
+                ordersHost.insertAdjacentHTML('afterbegin', PANEL_LOADER_HTML);
+                
+                // 1. Tải lại Lịch ăn và Danh mục từ DB
+                const [categories, schedule] = await Promise.all([
+                    fetchAllCategories(1000),
+                    fetchWeeklyMealSchedule()
+                ]);
+
+                const categoriesMap = {};
+                categories.forEach(cat => { categoriesMap[cat.$id] = cat.name; });
+
+                // 2. Tải lại Tồn kho thực tế
+                const dailyStocks = await fetchDailyDishStockByDate(state.dateKey);
+                
+                // 3. Xây dựng lại danh sách món dựa trên lịch mới
+                const scheduleItems = buildItemsFromSchedule(schedule, state.dayId, categoriesMap);
+
+                if (scheduleItems.length > 0) {
+                    const scheduleDishIds = new Set(scheduleItems.map((item) => String(item.id || "")));
+                    const relevantDailyStocksById = new Map(
+                        (dailyStocks || [])
+                            .filter((stock) => scheduleDishIds.has(String(stock.dishId || "")))
+                            .map((stock) => [String(stock.dishId || ""), stock])
+                    );
+
+                    // Cập nhật lại state items của tracker
+                    state.items = mergeWithDailyStock(scheduleItems, relevantDailyStocksById);
+                } else {
+                    state.items = [];
+                }
+
+                // 4. Đồng bộ đơn hàng và vẽ lại giao diện
+                await syncOrdersAndRender();
+                console.log("Đã tải lại lịch ăn hôm nay từ Database.");
+
+                // Cập nhật lại cache sau khi tải mới thủ công
+                relevantDailyStocksById.forEach((stock) => {
+                    const itemKey = `${stock.dishId}:${state.dateKey}`;
+                    const hash = `${stock.openingQty}|${stock.soldAutoQty}|${stock.soldAdjustQty}|${stock.remainingQty}|${stock.isAvailable}`;
+                    lastSyncedItemData.set(itemKey, hash);
+                });
+
+            } catch (err) {
+                console.error("Lỗi khi tải lại lịch ăn:", err);
+            } finally {
+                refreshBtn.classList.remove("spinning");
+                const loader = ordersHost.querySelector('.panel-loader-overlay');
+                if (loader) loader.remove();
+            }
+        }
+    });
 
     // Sự kiện thay đổi số lượng (có debounce)
     root.addEventListener("change", (event) => {
@@ -644,6 +748,10 @@ export async function initTodayDishTracker(root) {
                         remainingQty,
                         isAvailable: remainingQty > 0
                     });
+                    // Cập nhật cache ngay khi lưu thành công thay đổi thủ công
+                    const itemKey = `${item.id}:${state.dateKey}`;
+                    const hash = `${openingQty}|${soldAutoQty}|${soldAdjustQty}|${remainingQty}|${remainingQty > 0}`;
+                    lastSyncedItemData.set(itemKey, hash);
                 } catch (error) {
                     console.warn(`Không thể đồng bộ món ${item.id}:`, error);
                 }

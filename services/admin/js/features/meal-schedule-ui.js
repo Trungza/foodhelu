@@ -156,6 +156,24 @@ export function injectMealScheduleStyles() {
     grid-template-columns: repeat(3, 1fr);
     gap: 16px;
     margin-top: 12px;
+    max-height: 520px; /* Giới hạn độ cao tương đương 2 hàng card */
+    overflow-y: auto;
+    padding-right: 8px; /* Tạo khoảng trống cho thanh cuộn */
+}
+/* Tùy chỉnh thanh cuộn cho gọn đẹp */
+.meal-combo-grid::-webkit-scrollbar {
+    width: 6px;
+}
+.meal-combo-grid::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 10px;
+}
+.meal-combo-grid::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 10px;
+}
+.meal-combo-grid::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
 }
 .meal-combo-card {
     background: #ffffff;
@@ -306,7 +324,6 @@ export function renderPickedCombos(panel, combos, selectionKey = "") {
     if (!combos?.length) { container.innerHTML = ""; return; }
 
     container.innerHTML = `
-        <div class="meal-picked-title">Combo đã tạo</div>
         <div class="meal-combo-grid">
             ${combos.map((combo) => `
                 <div class="meal-combo-card" data-combo-id="${escapeHtml(combo.$id)}">

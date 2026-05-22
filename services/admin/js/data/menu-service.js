@@ -360,11 +360,17 @@ export async function publishWeeklyMealSchedule({ weekId, dishes = [], combos = 
     const resolveCategoryName = buildCategoryNameResolver(categories);
     const normalizedDishes = (dishes || []).map((entry) => ({
         ...entry,
-        categoryName: resolveCategoryName(entry?.categoryId, entry?.categoryName)
+        categoryName: resolveCategoryName(entry?.categoryId, entry?.categoryName),
+        // Đảm bảo ID ổn định cho Frontend
+        id: entry.id || entry.dishId || entry.$id
     }));
     const normalizedCombos = (combos || []).map((entry) => ({
         ...entry,
-        categoryName: resolveCategoryName(entry?.categoryId, entry?.categoryName)
+        categoryName: resolveCategoryName(entry?.categoryId, entry?.categoryName),
+        // Đảm bảo ID ổn định cho Frontend
+        id: entry.id || entry.comboId || entry.$id,
+        // Giữ nguyên mảng items bên trong
+        items: Array.isArray(entry.items) ? entry.items : []
     }));
     const payload = {
         weekId: normalizedWeekId,
@@ -391,8 +397,6 @@ export async function publishWeeklyMealSchedule({ weekId, dishes = [], combos = 
             createdAt: nowIso
         });
     }
-
-    await replaceComboDocuments(normalizedWeekId, normalizedCombos, nowIso);
 
     return {
         weekId: normalizedWeekId,
@@ -439,10 +443,29 @@ function parseWeeklyScheduleJson(rawScheduleJson) {
 
 function normalizeWeeklyScheduleDocument(document, fallbackWeekId) {
     const { dishes, combos } = parseWeeklyScheduleJson(document?.scheduleJson);
+    
+    // Chuẩn hóa Dish: Ép cả id và $id để tương thích với mọi logic filter ở UI
+    const normalizedDishes = dishes.map((d, idx) => ({
+        ...d,
+        id: d.id || d.dishId || d.$id || `dish_${idx}`,
+        $id: d.$id || d.id || d.dishId || `dish_${idx}`
+    }));
+
+    // Chuẩn hóa Combo: Đảm bảo không mất mảng items và ID không bị undefined
+    const normalizedCombos = combos.map((c, idx) => ({
+        ...c,
+        id: c.id || c.comboId || c.$id || `combo_${idx}`,
+        $id: c.$id || c.id || c.comboId || `combo_${idx}`,
+        items: Array.isArray(c.items) ? c.items.map((item, i) => ({
+            ...item,
+            id: item.id || item.dishId || `item_${idx}_${i}`
+        })) : []
+    }));
+
     return {
         weekId: document?.weekId || fallbackWeekId || "",
-        dishes,
-        combos,
+        dishes: normalizedDishes,
+        combos: normalizedCombos,
         updatedAt: document?.updatedAt || document?.publishedAt || document?.$updatedAt || null
     };
 }
@@ -545,26 +568,6 @@ export async function fetchWeeklyMealSchedule(weekId) {
         const document = await databases.getDocument(DATABASE_ID, COLLECTIONS.WEEKLY_SCHEDULES, documentId);
         const schedule = normalizeWeeklyScheduleDocument(document, normalizedWeekId);
         
-        // Làm giàu dữ liệu combo từ database (combos & combo_items)
-        try {
-            const liveCombos = await listAllDocuments(COLLECTIONS.COMBOS, [Query.equal("weekId", normalizedWeekId)]);
-            if (liveCombos.length > 0) {
-                schedule.combos = await Promise.all(liveCombos.map(async (c) => {
-                    const items = await listAllDocuments(COLLECTIONS.COMBO_ITEMS, [Query.equal("comboId", c.$id)]);
-                    return {
-                        ...c,
-                        comboId: c.$id,
-                        items: items.map(i => ({
-                            dishId: i.dishId,
-                            dishName: i.dishName,
-                            quantity: i.quantity,
-                            basePrice: i.basePrice,
-                            dishImageId: i.dishImageId
-                        }))
-                    };
-                }));
-            }
-        } catch (e) { console.warn("Không thể lấy chi tiết combo từ DB:", e); }
         return schedule;
     } catch (error) {
         const canFallbackToQuery = isDocumentNotFoundError(error) || isCollectionNotFoundError(error);
@@ -587,26 +590,6 @@ export async function fetchWeeklyMealSchedule(weekId) {
     if (!fallbackDocument) return null;
 
     const schedule = normalizeWeeklyScheduleDocument(fallbackDocument, normalizedWeekId);
-    // Tương tự cho fallback query
-    try {
-        const liveCombos = await listAllDocuments(COLLECTIONS.COMBOS, [Query.equal("weekId", normalizedWeekId)]);
-        if (liveCombos.length > 0) {
-            schedule.combos = await Promise.all(liveCombos.map(async (c) => {
-                const items = await listAllDocuments(COLLECTIONS.COMBO_ITEMS, [Query.equal("comboId", c.$id)]);
-                return {
-                    ...c,
-                    comboId: c.$id,
-                    items: items.map(i => ({
-                        dishId: i.dishId,
-                        dishName: i.dishName,
-                        quantity: i.quantity,
-                        basePrice: i.basePrice,
-                        dishImageId: i.dishImageId
-                    }))
-                };
-            }));
-        }
-    } catch (e) { console.warn("Không thể lấy chi tiết combo từ DB:", e); }
     return schedule;
 }
 

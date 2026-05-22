@@ -300,15 +300,13 @@ async function loadWeeklyMenuFromAppwrite() {
     try {
         const weekId = toWeekId(new Date());
         
-        // Lấy snapshot lịch trình và danh sách combo từ DB
-        const [scheduleRes, comboRes] = await Promise.all([
-            databases.listDocuments(DATABASE_ID, WEEKLY_SCHEDULES_COLLECTION_ID, [Query.equal("weekId", weekId), Query.limit(1)]),
-            databases.listDocuments(DATABASE_ID, DB.COLLECTIONS.COMBOS, [Query.equal("weekId", weekId), Query.limit(100)])
+        const scheduleRes = await databases.listDocuments(DATABASE_ID, WEEKLY_SCHEDULES_COLLECTION_ID, [
+            Query.equal("weekId", weekId),
+            Query.limit(1)
         ]);
 
         const doc = scheduleRes.documents[0] || null;
-        const schedule = doc ? JSON.parse(doc.scheduleJson) : { dishes: [], combos: [] };
-        const comboDocs = comboRes.documents || [];
+        const schedule = doc ? (typeof doc.scheduleJson === 'string' ? JSON.parse(doc.scheduleJson) : doc.scheduleJson) : { dishes: [], combos: [] };
         
         const newWeeklyData = {};
         Object.values(dayMapping).forEach(d => {
@@ -336,34 +334,30 @@ async function loadWeeklyMenuFromAppwrite() {
             });
         });
 
-        // 2. Xử lý Combo lấy trực tiếp từ DB combo_items
-        await Promise.all(comboDocs.map(async (combo) => {
+        // 2. Xử lý Combo từ schedule snapshot (JSON-First)
+        const combos = Array.isArray(schedule.combos) ? schedule.combos : [];
+        combos.forEach(combo => {
             const dayMeta = dayMapping[combo.dayId];
             if (!dayMeta) return;
 
-            // Lấy chi tiết món ăn trong combo từ collection combo_items
-            const itemsRes = await databases.listDocuments(DATABASE_ID, DB.COLLECTIONS.COMBO_ITEMS, [
-                Query.equal("comboId", combo.$id),
-                Query.limit(50)
-            ]);
-            const items = itemsRes.documents || [];
+            const items = Array.isArray(combo.items) ? combo.items : [];
             
             const catKey = "Combo";
             if (!newWeeklyData[dayMeta.key].categories[catKey]) {
                 newWeeklyData[dayMeta.key].categories[catKey] = [];
             }
 
-            const description = items.map(i => `${i.dishName} x${i.quantity}`).join(", ");
+            const description = items.map(i => `${i.dishName || i.name} x${i.quantity}`).join(", ");
 
             newWeeklyData[dayMeta.key].categories[catKey].push({
-                id: combo.$id,
+                id: combo.comboId || combo.$id, // Use comboId from JSON or $id if present
                 name: combo.name,
                 categoryName: "Combo",
                 description: description || "Combo đặc biệt",
                 price: combo.priceOverride || combo.price,
                 image: getDishImageUrl(items[0]?.dishImageId || items[0]?.imageId || "")
             });
-        }));
+        });
 
         weeklyData = newWeeklyData;
         displayWeeklyPanels();

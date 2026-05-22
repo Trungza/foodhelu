@@ -88,7 +88,6 @@ const ADMIN_STYLES = `
     .admin-tabs-shell {
         background: var(--admin-card-bg);
         padding: 0 2rem;
-        border-bottom: 1px solid var(--admin-border);
     }
 
     .admin-tabs {
@@ -111,7 +110,7 @@ const ADMIN_STYLES = `
 
     .tab-btn.active {
         color: var(--admin-primary);
-        border-bottom-color: var(--admin-primary);
+        border-bottom-color: none;
     }
 
     .tab-content { padding: 2rem; }
@@ -190,7 +189,77 @@ const ADMIN_STYLES = `
         overflow: hidden;
     }
     .notification-dropdown.active { display: block; }
+
+    /* Style cho món ăn chưa được kích hoạt hoặc chưa sẵn sàng trong modal */
+    .meal-combo-option {
+        order: 1; /* Mặc định các món bình thường lên đầu */
+    }
+
+    .meal-combo-option.not-allowed {
+        opacity: 0.5;
+        order: 2; /* Đẩy các món bị disable xuống cuối */
+        filter: grayscale(1);
+        background-color: #f1f5f9 !important;
+        cursor: not-allowed;
+        pointer-events: auto;
+        border: 1px dashed #cbd5e1 !important;
+    }
+
+    .meal-combo-option.not-allowed .item-status-tag {
+        background: #ef4444;
+        color: white;
+        font-size: 10px;
+        padding: 2px 6px;
+        border-radius: 4px;
+    }
+
+    /* Ẩn phần điều khiển tồn kho và trạng thái của Combo trong tab Tổng quan */
+    #overview .combo-track-item .today-dish-track-controls,
+    #overview .combo-track-item .stock-status-pill,
+    #overview .combo-track-item .stock-info,
+    #overview .combo-track-item .stock-label {
+        display: none !important;
+    }
+
+    /* Local Panel Loader (Giống style của Page Loader nhưng cho từng bảng) */
+    .tab-panel { position: relative; min-height: 200px; }
+    .panel-loader-overlay {
+        position: absolute;
+        inset: 0;
+        background: rgba(255, 255, 255, 0.8);
+        display: flex; justify-content: center; align-items: center;
+        z-index: 100;
+        backdrop-filter: blur(2px);
+        border-radius: 1rem;
+    }
+    .loader-wrapper-small { position: relative; width: 60px; height: 60px; display: flex; justify-content: center; align-items: center; }
+    .loader-logo-small { position: absolute; width: 30px; height: 30px; object-fit: contain; border-radius: 50%; z-index: 1; animation: logo-pulse 2s ease-in-out infinite; }
+    .loader-spinner-small { position: absolute; width: 100%; height: 100%; border: 2.5px solid rgba(0, 0, 0, 0.05); border-top: 2.5px solid var(--admin-primary); border-radius: 50%; animation: spin-loader 1s linear infinite; }
+    @keyframes spin-loader { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    @keyframes logo-pulse { 0%, 100% { transform: scale(1); opacity: 0.8; } 50% { transform: scale(1.1); opacity: 1; } }
+
+    /* Style cho nút tải lại lịch ăn trong tab tổng quan */
+    .today-dish-refresh-btn {
+        background: none;
+        border: none;
+        color: var(--admin-primary);
+        cursor: pointer;
+        margin-left: 10px;
+        padding: 4px;
+        transition: transform 0.3s ease;
+    }
+    .today-dish-refresh-btn:hover { color: var(--admin-primary-hover); }
+    .today-dish-refresh-btn.spinning i { animation: spin-loader 1s linear infinite; }
 </style>
+`;
+
+const PANEL_LOADER_HTML = `
+    <div class="panel-loader-overlay">
+        <div class="loader-wrapper-small">
+            <div class="loader-spinner-small"></div>
+            <img src="../customer/img/logo.png" class="loader-logo-small" alt="Logo" onerror="this.style.display='none'">
+        </div>
+    </div>
 `;
 
 function renderHeader(user) {
@@ -213,7 +282,7 @@ function renderHeader(user) {
           </div>
         </div>
         <span class="user-chip">${user.name || user.email}</span>
-        <button id="logoutBtn" class="logout-btn" style="background: #fee2e2; color: #991b1b; border: none;">Đăng xuất</button>
+        <button id="logoutBtn" class="logout-btn" style="background: #fee2e2; color: #991b1b; border: none;"><i class="fas fa-sign-out-alt"></i> Đăng xuất</button>
       </div>
     </header>
   `;
@@ -350,16 +419,31 @@ function buildPrintHtml(order) {
 }
 
 async function renderPanels() {
-  const ordersTableHtml = await renderOrdersTable();
-  const revenueStatsHtml = await renderRevenueStats();
+  // Tối ưu: Chạy tất cả các renderer song song để giảm thời gian chờ
+  const [
+    ordersTableHtml,
+    revenueStatsHtml,
+    statsHtml,
+    menuManagerHtml,
+    galleryManagerHtml,
+    mealScheduleHtml
+  ] = await Promise.all([
+    renderOrdersTable(),
+    renderRevenueStats(),
+    renderStats(),
+    renderMenuManager(),
+    renderGalleryManager(),
+    renderMealSchedule()
+  ]);
+
   return `
     <main class="tab-content">
-      <section class="tab-panel active" id="overview">${await renderStats()}</section>
+      <section class="tab-panel active" id="overview">${statsHtml}</section>
       <section class="tab-panel" id="orders">${ordersTableHtml}</section>
       <section class="tab-panel" id="stats">${revenueStatsHtml}</section>
-      <section class="tab-panel" id="menu">${await renderMenuManager()}</section>
-      <section class="tab-panel" id="gallery">${await renderGalleryManager()}</section>
-      <section class="tab-panel" id="schedule">${await renderMealSchedule()}</section>
+      <section class="tab-panel" id="menu">${menuManagerHtml}</section>
+      <section class="tab-panel" id="gallery">${galleryManagerHtml}</section>
+      <section class="tab-panel" id="schedule">${mealScheduleHtml}</section>
     </main>
   `;
 }
@@ -528,6 +612,7 @@ async function refreshSchedulePanel(app) {
   const panel = app.querySelector("#schedule");
   if (!panel) return;
   try {
+    panel.insertAdjacentHTML('afterbegin', PANEL_LOADER_HTML);
     resetMealScheduleCache();
     const scheduleHtml = await renderMealSchedule();
     panel.innerHTML = scheduleHtml;
@@ -541,10 +626,16 @@ async function refreshOverviewPanel(app) {
   const panel = app.querySelector("#overview");
   if (!panel) return;
   try {
-    panel.innerHTML = await renderStats();
-    initTodayDishTracker(app);
+    panel.insertAdjacentHTML('afterbegin', PANEL_LOADER_HTML);
+    const statsHtml = await renderStats();
+    panel.innerHTML = statsHtml; // Render các thống kê chính trước
+    // Sau đó, đảm bảo món ăn hôm nay được tải và loader được gỡ bỏ
+    await initTodayDishTracker(app); // Chờ cho món ăn hôm nay tải xong
   } catch (error) {
     console.error(error);
+  } finally {
+    const loader = panel.querySelector('.panel-loader-overlay');
+    if (loader) loader.remove();
   }
 }
 
@@ -623,7 +714,10 @@ function startRealtimeMenuSchedule(app) {
       scheduleRefreshTimer = setTimeout(() => {
         // Chỉ refresh khi thực sự cần thiết để tránh lag
         if (activeTab === 'schedule') refreshSchedulePanel(app);
-        if (activeTab === 'overview') refreshOverviewPanel(app);
+        if (activeTab === 'overview') {
+          // Tối ưu: Chỉ cập nhật lại danh sách món hôm nay, không nạp lại toàn bộ Stats/Doanh thu
+          initTodayDishTracker(app);
+        }
         console.log("Realtime: Schedule panel refreshed after batch update.");
       }, 1500); // Tăng thời gian debounce cho các thao tác đăng lịch nặng
     }
@@ -706,8 +800,12 @@ export async function renderDashboard(user) {
   }
 
   window.addEventListener("weekly-schedule:published", () => {
-    refreshSchedulePanel(app);
-    refreshOverviewPanel(app);
+    // Chỉ làm mới dữ liệu ở các panel liên quan mà không chuyển tab
+    Promise.all([
+      refreshSchedulePanel(app),
+      // Tối ưu: Cập nhật ngay danh sách món ăn hôm nay mà không xóa trắng toàn bộ panel
+      initTodayDishTracker(app)
+    ]).then(() => console.log("Lịch ăn đã được đồng bộ sang Tổng quan."));
   });
 
   // System settings: stop accepting orders + kitchen overload indicator
@@ -753,4 +851,14 @@ export async function renderDashboard(user) {
     attachOrdersEvents(app);
     attachFilterEvents(app);
   }
+
+  // Ngăn chặn chọn món bị disable và hiển thị thông báo toast
+  app.addEventListener('click', (e) => {
+    const disabledItem = e.target.closest('.meal-combo-option.not-allowed');
+    if (disabledItem) {
+      e.preventDefault();
+      e.stopPropagation();
+      window.showToast("Món ăn này chưa được kích hoạt. Hãy bật 'Trạng thái sử dụng' trong tab Thực đơn.", "info");
+    }
+  }, true); // Sử dụng capture phase để chặn sự kiện trước khi các logic chọn món khác chạy
 }

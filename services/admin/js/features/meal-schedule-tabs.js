@@ -12,6 +12,15 @@ import {
     applyPublishedScheduleToMaps, normalizeDishForSelection
 } from "./meal-schedule-state.js";
 
+const PANEL_LOADER_HTML = `
+    <div class="panel-loader-overlay">
+        <div class="loader-wrapper-small">
+            <div class="loader-spinner-small"></div>
+            <img src="../customer/img/logo.png" class="loader-logo-small" alt="Logo" onerror="this.style.display='none'">
+        </div>
+    </div>
+`;
+
 // ========== CACHE DỮ LIỆU (chỉ fetch 1 lần) ==========
 let cachedCategories = null;              // array categories (đã lọc bỏ COMBO)
 let cachedDishesByCategory = new Map();   // Map: categoryId -> array dishes (có basePrice)
@@ -181,8 +190,11 @@ export function initMealScheduleTabs(root) {
 
     root.querySelector(".meal-schedule-publish-btn")?.addEventListener("click", async (e) => {
         const btn = e.target;
+        const schedulePanel = root.closest('.tab-panel');
         try {
             btn.disabled = true;
+            if (schedulePanel) schedulePanel.insertAdjacentHTML('afterbegin', PANEL_LOADER_HTML);
+
             const result = await publishWeeklyMealSchedule({
                 dishes: flattenSelectedDishes(selectedByDayCategory),
                 combos: flattenSelectedCombos(combosByDayCategory)
@@ -194,6 +206,8 @@ export function initMealScheduleTabs(root) {
             showToast(err.message, "error");
         } finally {
             btn.disabled = false;
+            const loader = schedulePanel?.querySelector('.panel-loader-overlay');
+            if (loader) loader.remove();
         }
     });
 

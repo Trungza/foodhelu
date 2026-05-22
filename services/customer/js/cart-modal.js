@@ -76,7 +76,7 @@ function isAtMaxStock(item, requestedQuantity) {
 function addToCart(product) {
     if (!product || !product.id) return;
 
-    const existingProduct = cart.find(item => item.id === product.id);
+    const existingProduct = cart.find(item => String(item.id) === String(product.id));
 
     if (existingProduct) {
         if (isAtMaxStock(existingProduct, existingProduct.quantity + 1)) {
@@ -113,7 +113,7 @@ function addToCart(product) {
 
 // Xóa sản phẩm khỏi giỏ hàng
 function removeFromCart(productId) {
-    cart = cart.filter(item => item.id !== productId);
+    cart = cart.filter(item => String(item.id) !== String(productId));
     updateCartCount();
     saveCartToLocalStorage();
     renderCartItems();
@@ -127,7 +127,7 @@ function updateQuantity(productId, newQuantity) {
         return;
     }
 
-    const product = cart.find(item => item.id === productId);
+    const product = cart.find(item => String(item.id) === String(productId));
     if (product) {
         if (newQuantity > product.quantity && isAtMaxStock(product, newQuantity)) {
             showToast(`Nhà bếp không còn đủ nguyên liệu cho số lượng này`, 'error');
@@ -240,16 +240,16 @@ function renderCartItems() {
                 ${item.note ? `<div style="font-size: 11px; color: #94a3b8; margin-bottom: 4px;">${escapeHtml(item.note)}</div>` : ''}
                 <div class="cart-item-price">${Number(item.price).toLocaleString('vi-VN')}đ</div>
                 <div class="cart-item-quantity">
-                    <button class="qty-btn minus" onclick="updateQuantity(${item.id}, ${item.quantity - 1})">-</button>
+                    <button class="qty-btn minus" onclick="updateQuantity('${item.id}', ${item.quantity - 1})">-</button>
                     <span class="qty-value">${item.quantity}</span>
-                    <button class="qty-btn plus" onclick="updateQuantity(${item.id}, ${item.quantity + 1})" 
+                    <button class="qty-btn plus" onclick="updateQuantity('${item.id}', ${item.quantity + 1})" 
                         ${isAtMaxStock(item, item.quantity + 1) ? 'disabled style="opacity: 0.4; cursor: not-allowed;"' : ''}>+</button>
                 </div>
             </div>
             <div class="cart-item-subtotal">
                 ${Number(item.price * item.quantity).toLocaleString('vi-VN')}đ
             </div>
-            <button class="cart-item-remove" onclick="removeFromCart(${item.id})">
+            <button class="cart-item-remove" onclick="removeFromCart('${item.id}')">
                 <i class="fas fa-trash-alt"></i>
             </button>
         </div>

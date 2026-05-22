@@ -344,30 +344,46 @@ function isStockAvailable(stockDoc) {
 
 function isDishAvailableWithStock(dishDoc, stockByDishId) {
     if (!dishDoc) return false;
-    if (dishDoc?.isAvailable === false) return false;
 
-    const stockDoc = stockByDishId.get(String(dishDoc.$id || ""));
-    const stockAvailability = isStockAvailable(stockDoc);
-    if (stockAvailability === null) return true;
-    return stockAvailability;
+    const dishId = String(dishDoc.$id || dishDoc.id || "");
+    const stockDoc = stockByDishId.get(dishId);
+
+    // Bắt buộc phải có dữ liệu tồn kho hôm nay và số lượng còn lại > 0
+    if (!stockDoc) return false;
+
+    const remaining = getStockRemaining(stockDoc);
+    return remaining > 0 && stockDoc.isAvailable !== false;
 }
 
 function buildReplacementCandidates(sourceItem, sourceDishDoc, dishesByCategory, stockByDishId) {
-    const categoryId = String(sourceDishDoc?.categoryId || "").trim();
+    // Lấy ID danh mục từ dữ liệu gốc của món ăn
+    const categoryId = String(sourceDishDoc?.categoryId || sourceItem?.categoryId || "").trim();
     if (!categoryId) return [];
 
+    // Lấy tất cả món ăn trong cùng danh mục
     const candidates = dishesByCategory.get(categoryId) || [];
+    
     return candidates
-        .filter((dish) => String(dish?.$id || "") !== String(sourceItem?.dishId || ""))
-        .filter((dish) => isDishAvailableWithStock(dish, stockByDishId))
+        .filter((dish) => {
+            const dishId = String(dish?.$id || dish?.id || "");
+            const sourceId = String(sourceItem?.dishId || sourceItem?.id || "");
+            // Loại bỏ chính món đang bị hết hàng khỏi danh sách gợi ý
+            return dishId !== sourceId;
+        })
+        .filter((dish) => isDishAvailableWithStock(dish, stockByDishId)) // Chỉ lấy món còn hàng
         .slice(0, MAX_REPLACEMENTS_PER_ITEM)
-        .map((dish) => ({
-            id: String(dish.$id),
-            name: dish?.name || "Mon thay the",
-            price: roundPrice(toFiniteNumber(dish?.price) || 0),
-            available: true,
-            image: getDishImageUrl(dish?.imageId || "")
-        }));
+        .map((dish) => {
+            const dishId = String(dish.$id || dish.id);
+            const stockDoc = stockByDishId.get(dishId);
+            return {
+                id: dishId,
+                name: dish?.name || "Món thay thế",
+                price: roundPrice(toFiniteNumber(dish?.price) || 0),
+                available: true,
+                image: getDishImageUrl(dish?.imageId || ""),
+                maxStock: getStockRemaining(stockDoc)
+            };
+        });
 }
 
 function collectComboImages(items = []) {
@@ -448,8 +464,8 @@ function mapApiComboToViewModel(rawCombo, index, dishesById, dishesByCategory, s
             const originalPrice = roundPrice(basePrice ?? dishPrice ?? 0);
 
             const stockDoc = dishId ? stockByDishId.get(dishId) : null;
-            const stockAvailability = isStockAvailable(stockDoc);
-            const remainingQty = stockDoc ? getStockRemaining(stockDoc) : 999;
+            const remainingQty = stockDoc ? getStockRemaining(stockDoc) : 0;
+            const stockAvailability = stockDoc ? (remainingQty > 0 && stockDoc.isAvailable !== false) : null;
 
             const available = stockAvailability === null
                 ? (sourceDish ? sourceDish?.isAvailable !== false : false)
@@ -592,7 +608,10 @@ function createComboItemRow(comboId, item) {
                 data-replacement-id="${escapeHtml(replacement.id)}"
             >
                 ${createDishThumbHTML(replacement.image || "", replacement.name || "Mon thay the", "replacement-option-thumb")}
-                <span class="replacement-option-name">${escapeHtml(replacement.name)}</span>
+                <span class="replacement-option-name">
+                    ${escapeHtml(replacement.name)}
+                    <span style="display: block; font-size: 10px; color: #64748b; font-weight: 400; margin-top: 2px;">Còn ${replacement.maxStock} suất</span>
+                </span>
                 <span class="replacement-option-price">+${replacement.price.toLocaleString('vi-VN')}đ</span>
             </button>
         `;
@@ -797,57 +816,31 @@ async function loadCombosFromApi() {
 
     grid.innerHTML = '<p class="no-items">Dang tai combo...</p>';
 
+    let todayCombos = [];
     try {
         const now = new Date();
         const weekId = toWeekId(now);
         const todayDayId = getTodayDayId(now);
         const todayDateKey = toDateKey(now);
-        console.log(`Loading combos for weekId=${weekId}, todayDayId=${todayDayId}, todayDateKey=${todayDateKey}`);
 
-        const [scheduleDoc, comboDocs, dishesIndex, stockByDishId] = await Promise.all([
+        const [scheduleDoc, dishesIndex, stockByDishId] = await Promise.all([
             fetchWeeklyScheduleDocument(weekId),
-            fetchWeeklyComboDocuments(weekId, todayDayId),
             fetchDishesIndex(),
             fetchTodayStockMap(todayDateKey)
         ]);
-        console.log(`Fetched comboDocs:`, comboDocs);
 
-        let todayCombos = [];
-        if (Array.isArray(comboDocs) && comboDocs.length) {
-            console.log(`Found ${comboDocs.length} combos in collection`);
-            const comboItemsById = new Map();
-            await Promise.all(comboDocs.map(async (comboDoc) => {
-                const items = await fetchComboItemsByComboId(comboDoc.$id).catch(() => []);
-                console.log(`Combo ${comboDoc.$id}: ${items.length} items`);
-                comboItemsById.set(String(comboDoc.$id), items);
-            }));
+        // Ưu tiên đọc từ JSON của tuần hiện tại
+        let parsed = parseScheduleJson(scheduleDoc?.scheduleJson);
+        let combosRaw = Array.isArray(parsed?.combos) ? parsed.combos : [];
 
-            todayCombos = comboDocs
-                .filter((combo) => combo?.isActive !== false)
-                .map((combo, index) => mapApiComboToViewModel(
-                    {
-                        ...combo,
-                        items: (comboItemsById.get(String(combo.$id)) || []).map((item) => ({
-                            dishId: item?.dishId || "",
-                            dishName: item?.dishName || item?.name || "Món ăn",
-                            quantity: item?.quantity,
-                            basePrice: item?.basePrice,
-                            dishImageId: item?.dishImageId || ""
-                        }))
-                    },
-                    index,
-                    dishesIndex.byId,
-                    dishesIndex.byCategory,
-                    stockByDishId
-                ));
+        // Nếu không có lịch tuần này, thử lấy lịch mới nhất đã publish (fallback)
+        if (!combosRaw.length && !scheduleDoc) {
+            const latestScheduleDoc = await fetchLatestWeeklyScheduleDocument();
+            parsed = parseScheduleJson(latestScheduleDoc?.scheduleJson);
+            combosRaw = Array.isArray(parsed?.combos) ? parsed.combos : [];
         }
 
-        if (!todayCombos.length) {
-            console.log(`No combos from collection, falling back to JSON schedule`);
-            let parsed = parseScheduleJson(scheduleDoc?.scheduleJson);
-            const combosRaw = Array.isArray(parsed?.combos) ? parsed.combos : [];
-            console.log(`Found ${combosRaw.length} combos in JSON schedule`);
-
+        if (combosRaw.length) {
             todayCombos = combosRaw
                 .filter((combo) => {
                     if (combo?.isActive === false) return false;
@@ -855,19 +848,6 @@ async function loadCombosFromApi() {
                     return comboDayId === todayDayId;
                 })
                 .map((combo, index) => mapApiComboToViewModel(combo, index, dishesIndex.byId, dishesIndex.byCategory, stockByDishId));
-
-            if (!todayCombos.length && !scheduleDoc) {
-                const latestScheduleDoc = await fetchLatestWeeklyScheduleDocument();
-                parsed = parseScheduleJson(latestScheduleDoc?.scheduleJson);
-                const latestCombosRaw = Array.isArray(parsed?.combos) ? parsed.combos : [];
-                todayCombos = latestCombosRaw
-                    .filter((combo) => {
-                        if (combo?.isActive === false) return false;
-                        const comboDayId = String(combo?.dayId || "").trim().toLowerCase();
-                        return comboDayId === todayDayId;
-                    })
-                    .map((combo, index) => mapApiComboToViewModel(combo, index, dishesIndex.byId, dishesIndex.byCategory, stockByDishId));
-            }
         }
 
         menuState.combos = todayCombos;
