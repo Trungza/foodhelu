@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿// DISHES.JS - LOAD REAL DATA FROM APPWRITE
+﻿﻿﻿﻿﻿﻿﻿// DISHES.JS - LOAD REAL DATA FROM APPWRITE
 import { APPWRITE_CONFIG, DB } from "../../shared/js/config.js";
 import { databases, Query, DATABASE_ID, BUCKET_ID } from "../../shared/js/appwrite.js";
 
@@ -168,10 +168,71 @@ function setupTabs() {
         tab.addEventListener("click", () => {
             const slug = tab.getAttribute("data-category") || "";
             if (!slug) return;
+            
+            // Xóa nội dung tìm kiếm khi chuyển danh mục
+            const searchInput = document.getElementById("dishSearchInput");
+            if (searchInput) searchInput.value = "";
+            
             currentDishCategory = slug;
             updateActiveTab(slug);
             displayDishesByCategory(slug);
         });
+    });
+}
+
+/**
+ * Khởi tạo chức năng tìm kiếm món ăn
+ */
+function setupSearch() {
+    const searchInput = document.getElementById("dishSearchInput");
+    const headerSearchBtn = document.getElementById("headerSearchIcon");
+
+    if (!searchInput) return;
+
+    // Sự kiện click vào icon tìm kiếm trên Header
+    if (headerSearchBtn) {
+        headerSearchBtn.addEventListener("click", () => {
+            const section = document.getElementById("dishes-menu");
+            if (section) {
+                // Cuộn mượt mà xuống phần thực đơn
+                section.scrollIntoView({ behavior: 'smooth' });
+                // Focus vào ô input sau khi cuộn (khoảng 600ms)
+                setTimeout(() => searchInput.focus(), 600);
+            }
+        });
+    }
+
+    searchInput.addEventListener("input", (e) => {
+        const searchTerm = normalizeText(e.target.value);
+        
+        if (!searchTerm) {
+            // Nếu xóa trắng thì hiển thị lại theo danh mục đang chọn
+            displayDishesByCategory(currentDishCategory);
+            updateActiveTab(currentDishCategory);
+            return;
+        }
+
+        // Tìm kiếm trên toàn bộ dữ liệu món ăn đã tải (không phân biệt danh mục)
+        const results = [];
+        dishRuntimeIdToDish.forEach(dish => {
+            const nameMatch = normalizeText(dish.name).includes(searchTerm);
+            const descMatch = normalizeText(dish.description).includes(searchTerm);
+            if (nameMatch || descMatch) {
+                results.push(dish);
+            }
+        });
+
+        // Bỏ trạng thái active của các tab khi đang tìm kiếm
+        document.querySelectorAll(".tab-btn").forEach(t => t.classList.remove("active"));
+        
+        const grid = document.getElementById("dishesGrid");
+        if (grid) {
+            if (results.length === 0) {
+                grid.innerHTML = `<p class="no-items" style="grid-column: 1/-1; text-align: center; padding: 40px; color: #94a3b8;">Không tìm thấy món ăn nào khớp với "${escapeHtml(e.target.value)}"</p>`;
+            } else {
+                grid.innerHTML = results.map(renderDishCard).join("");
+            }
+        }
     });
 }
 
@@ -422,6 +483,7 @@ async function loadDishesFromDb() {
         updateActiveTab(currentDishCategory);
         displayDishesByCategory(currentDishCategory);
         setupTabs();
+        setupSearch(); // Kích hoạt tìm kiếm sau khi tải xong dữ liệu
         updateTotalItemsCount();
     } catch (error) {
         console.error("Khong tai duoc mon an tu DB:", error);

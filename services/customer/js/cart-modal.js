@@ -337,6 +337,32 @@ function showCheckoutForm() {
     if (submitBtn) submitBtn.style.display = 'inline-block';
     if (modalTitle) modalTitle.textContent = 'Thông tin thanh toán';
 
+    // Chèn thêm lựa chọn phương thức thanh toán nếu chưa có
+    if (!document.getElementById('paymentMethodGroup')) {
+        const paymentHtml = `
+            <div class="form-group" id="paymentMethodGroup" style="width: 100%; margin-top: 15px;">
+                <label>Phương thức thanh toán</label>
+                <div class="payment-options" style="display: flex; gap: 12px; margin-top: 8px;">
+                    <label class="payment-option">
+                        <input type="radio" name="paymentMethod" value="cash" checked>
+                        <div class="payment-card">
+                            <i class="fas fa-money-bill-wave"></i>
+                            <span>Tiền mặt</span>
+                        </div>
+                    </label>
+                    <label class="payment-option">
+                        <input type="radio" name="paymentMethod" value="qr">
+                        <div class="payment-card">
+                            <i class="fas fa-qrcode"></i>
+                            <span>Chuyển khoản QR</span>
+                        </div>
+                    </label>
+                </div>
+            </div>
+        `;
+        checkoutForm.insertAdjacentHTML('beforeend', paymentHtml);
+    }
+
     setupDeliveryTimeOptions();
     updateCheckoutTotal();
 }
@@ -401,12 +427,37 @@ function triggerModalShake() {
     }
 }
 
+/**
+ * Hiển thị Modal QR Code để thanh toán
+ */
+function showQRModal(orderId, amount) {
+    const bankId = "MB"; // Thay bằng ID ngân hàng của bạn (ví dụ: VCB, MB, ICB)
+    const accountNo = "0376390692"; // Thay bằng số tài khoản của bạn
+    const accountName = "NGUYEN BA TRUNG"; // Thay bằng tên chủ tài khoản (không dấu)
+    
+    const qrUrl = `https://img.vietqr.io/image/${bankId}-${accountNo}-compact2.png?amount=${amount}&addInfo=HELUFOOD ${orderId}&accountName=${accountName}`;
+    
+    const modalHtml = `
+        <div id="paymentQRModal" class="status-modal active" style="z-index: 10002;">
+            <div class="status-modal-content" style="max-width: 400px; text-align: center; padding: 30px;">
+                <h3 style="margin-bottom: 15px;">Quét mã để thanh toán</h3>
+                <p style="font-size: 14px; color: #64748b; margin-bottom: 20px;">Vui lòng quét mã QR dưới đây để hoàn tất thanh toán cho đơn hàng <strong>#${orderId}</strong></p>
+                <img src="${qrUrl}" alt="VietQR" style="width: 100%; border-radius: 12px; margin-bottom: 20px; border: 1px solid #e2e8f0;">
+                <div style="font-weight: 700; font-size: 20px; color: #2563eb; margin-bottom: 20px;">${amount.toLocaleString('vi-VN')}đ</div>
+                <button onclick="document.getElementById('paymentQRModal').remove()" class="cart-submit-btn" style="width: 100%;">Tôi đã chuyển khoản</button>
+            </div>
+        </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+}
+
 async function submitOrder() {
     const customerName = document.getElementById('customerName')?.value.trim();
     const customerPhone = document.getElementById('customerPhone')?.value.trim();
     const customerAddress = document.getElementById('customerAddress')?.value.trim();
     const deliveryTimeType = document.querySelector('input[name="deliveryTimeType"]:checked')?.value || 'asap';
     const deliveryTimeValue = document.getElementById('customerDeliveryTime')?.value || '';
+    const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked')?.value || 'cash';
     
     // Validate thông tin
     if (!customerName) {
@@ -465,7 +516,8 @@ async function submitOrder() {
     showLoading(true);
     
     const total = calculateTotal();
-    const orderId = 'ORD_' + Date.now();
+    const shortId = Date.now().toString().slice(-6);
+    const orderId = 'ORD_' + shortId;
     const currentDateTime = new Date().toISOString(); // orderDate
     
     // Chuẩn bị dữ liệu đơn hàng theo đúng cấu trúc collection orders
@@ -476,6 +528,7 @@ async function submitOrder() {
         totalAmount: total,                     // trường bắt buộc (integer)
         orderDate: currentDateTime,            // trường bắt buộc (datetime)
         status: 'pending',                     // trường bắt buộc (enum)
+        paymentMethod: paymentMethod,
         deliveryTime: deliverySchedule.type === 'scheduled' ? deliverySchedule.value : null,
         items: JSON.stringify(cart.map(item => {
         if (item.isCombo && item.comboItems) {
@@ -533,6 +586,11 @@ async function submitOrder() {
             
             showToast(`✅ Đặt hàng thành công! Mã đơn: ${orderId}`, 'success');
             
+            // Hiển thị mã QR nếu chọn thanh toán chuyển khoản
+            if (paymentMethod === 'qr') {
+                showQRModal(shortId, total);
+            }
+
             // Reset form
             document.getElementById('customerName').value = '';
             document.getElementById('customerPhone').value = '';

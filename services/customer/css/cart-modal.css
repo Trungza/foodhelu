@@ -254,13 +254,13 @@
 }
 
 .cart-total span:first-child {
-    color: #fff;
+    color: #1e293b;
     font-size: 16px;
     font-weight: 600;
 }
 
 .cart-total-price {
-    color: #fff;
+    color: #1e293b;
     font-size: 32px;
     font-weight: 800;
 }
@@ -334,7 +334,45 @@
 .form-group {
     margin-bottom: 20px;
     display: inline-block;
-    width: 48%;
+    width: 100%;
+}
+
+/* Payment Options Styling */
+.payment-option {
+    flex: 1;
+    cursor: pointer;
+}
+
+.payment-option input {
+    display: none;
+}
+
+.payment-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 16px;
+    background: #fff;
+    border: 2px solid #e2e8f0;
+    border-radius: 16px;
+    transition: all 0.2s ease;
+}
+
+.payment-card i {
+    font-size: 24px;
+    color: #64748b;
+}
+
+.payment-option input:checked + .payment-card {
+    border-color: #2563eb;
+    background: #eff6ff;
+}
+
+.payment-option input:checked + .payment-card i,
+.payment-option input:checked + .payment-card span {
+    color: #2563eb;
+    font-weight: 700;
 }
 
 .form-group label {

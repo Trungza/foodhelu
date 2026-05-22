@@ -34,30 +34,186 @@ import { DB } from "../../../shared/js/config.js";
 window.showToast = showToast;
 window.showConfirmDialog = showConfirmDialog;
 
+const ADMIN_STYLES = `
+<style>
+    :root {
+        --admin-primary: #4f46e5;
+        --admin-primary-hover: #4338ca;
+        --admin-bg: #f8fafc;
+        --admin-card-bg: #ffffff;
+        --admin-text-main: #1e293b;
+        --admin-text-muted: #64748b;
+        --admin-border: #e2e8f0;
+        --admin-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    }
+
+    .dashboard-shell {
+        background-color: var(--admin-bg);
+        min-height: 100vh;
+        font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        color: var(--admin-text-main);
+    }
+
+    .admin-header {
+        background: var(--admin-card-bg);
+        padding: 1.25rem 2rem;
+        border-bottom: 1px solid var(--admin-border);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: sticky;
+        top: 0;
+        z-index: 50;
+    }
+
+    .admin-header h1 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--admin-primary);
+        margin: 0;
+    }
+
+    .admin-header p {
+        font-size: 0.875rem;
+        color: var(--admin-text-muted);
+        margin: 0;
+    }
+
+    .header-right {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+    }
+
+    .admin-tabs-shell {
+        background: var(--admin-card-bg);
+        padding: 0 2rem;
+        border-bottom: 1px solid var(--admin-border);
+    }
+
+    .admin-tabs {
+        display: flex;
+        gap: 2rem;
+    }
+
+    .tab-btn {
+        padding: 1rem 0;
+        font-weight: 600;
+        color: var(--admin-text-muted);
+        border-bottom: 2px solid transparent;
+        transition: all 0.2s;
+        background: none;
+        border-top: none; border-left: none; border-right: none;
+        cursor: pointer;
+    }
+
+    .tab-btn:hover { color: var(--admin-primary); }
+
+    .tab-btn.active {
+        color: var(--admin-primary);
+        border-bottom-color: var(--admin-primary);
+    }
+
+    .tab-content { padding: 2rem; }
+
+    .stat-card {
+        background: var(--admin-card-bg);
+        padding: 1.5rem;
+        border-radius: 1rem;
+        border: 1px solid var(--admin-border);
+        box-shadow: var(--admin-shadow);
+        transition: transform 0.2s;
+    }
+
+    .stat-card:hover { transform: translateY(-2px); }
+
+    .logout-btn {
+        padding: 0.5rem 1rem;
+        border-radius: 0.5rem;
+        font-weight: 600;
+        transition: all 0.2s;
+        cursor: pointer;
+    }
+
+    .user-chip {
+        background: #f1f5f9;
+        padding: 0.4rem 0.8rem;
+        border-radius: 2rem;
+        font-size: 0.875rem;
+        font-weight: 600;
+    }
+
+    /* Status Badges */
+    .badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+    }
+    .badge.pending { background: #fef3c7; color: #92400e; }
+    .badge.confirmed { background: #dbeafe; color: #1e40af; }
+    .badge.completed { background: #dcfce7; color: #166534; }
+
+    /* Notification Bell Styles */
+    .admin-notification-bell {
+        position: relative;
+        cursor: pointer;
+        font-size: 1.25rem;
+        color: var(--admin-text-muted);
+        padding: 0.5rem;
+        transition: color 0.2s;
+    }
+    .admin-notification-bell:hover { color: var(--admin-primary); }
+    .bell-badge {
+        position: absolute;
+        top: 2px;
+        right: 2px;
+        background: #ef4444;
+        color: white;
+        font-size: 0.65rem;
+        padding: 2px 5px;
+        border-radius: 999px;
+        border: 2px solid white;
+    }
+    .notification-dropdown {
+        position: absolute;
+        top: 100%;
+        right: 0;
+        width: 300px;
+        background: white;
+        border-radius: 0.75rem;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        border: 1px solid var(--admin-border);
+        display: none;
+        margin-top: 0.5rem;
+        overflow: hidden;
+    }
+    .notification-dropdown.active { display: block; }
+</style>
+`;
+
 function renderHeader(user) {
   return `
     <header class="admin-header">
       <div>
-        <h1>Admin Dashboard</h1>
-        <p>Quản lý hệ thống</p>
+        <h1>Helu Food Admin</h1>
+        <p>Chào ngày mới, quản trị viên!</p>
       </div>
       <div class="header-right">
-        <button id="acceptOrdersBtn" class="logout-btn" style="background: rgba(239,68,68,0.15); border: 1px solid rgba(239,68,68,0.35);">
-          Tạm ngừng nhận đơn
-        </button>
-        <div class="admin-notification-bell" title="Thông báo">
+        <button id="acceptOrdersBtn" class="logout-btn"></button>
+        <div class="admin-notification-bell" id="adminNotificationBell">
           <i class="fas fa-bell"></i>
-          <span class="bell-badge">3</span>
-          <div class="admin-notification-dropdown" id="notificationDropdown">
-            <div class="notification-header">Thông báo mới</div>
-            <ul class="notification-list" id="notificationList">
-              <li class="empty-notification">Không có thông báo mới</li>
+          <span class="bell-badge" id="admin-bell-badge">0</span>
+          <div class="notification-dropdown" id="adminNotificationDropdown">
+            <div style="padding: 1rem; font-weight: 700; border-bottom: 1px solid var(--admin-border);">Thông báo mới</div>
+            <ul id="adminNotificationList" style="list-style: none; padding: 0; margin: 0; max-height: 300px; overflow-y: auto;">
+                <li style="padding: 1rem; text-align: center; color: var(--admin-text-muted);">Không có thông báo mới</li>
             </ul>
-            <div class="notification-footer">Xem tất cả thông báo</div>
           </div>
         </div>
         <span class="user-chip">${user.name || user.email}</span>
-        <button id="logoutBtn" class="logout-btn">Đăng xuất</button>
+        <button id="logoutBtn" class="logout-btn" style="background: #fee2e2; color: #991b1b; border: none;">Đăng xuất</button>
       </div>
     </header>
   `;
@@ -67,12 +223,12 @@ function renderTabs() {
   return `
     <div class="admin-tabs-shell">
       <div class="admin-tabs">
-        <button class="tab-btn active" data-tab="overview">Tổng quan</button>
-        <button class="tab-btn" data-tab="orders">Đơn hàng</button>
-        <button class="tab-btn" data-tab="stats">Thống kê</button>
-        <button class="tab-btn" data-tab="menu">Đồ ăn</button>
-        <button class="tab-btn" data-tab="gallery">Thư viện ảnh</button>
-        <button class="tab-btn" data-tab="schedule">Lịch ăn</button>
+        <button class="tab-btn active" data-tab="overview"><i class="fas fa-chart-pie"></i> Tổng quan</button>
+        <button class="tab-btn" data-tab="orders"><i class="fas fa-shopping-bag"></i> Đơn hàng</button>
+        <button class="tab-btn" data-tab="stats"><i class="fas fa-file-invoice-dollar"></i> Doanh thu</button>
+        <button class="tab-btn" data-tab="menu"><i class="fas fa-utensils"></i> Thực đơn</button>
+        <button class="tab-btn" data-tab="gallery"><i class="fas fa-images"></i> Thư viện</button>
+        <button class="tab-btn" data-tab="schedule"><i class="fas fa-calendar-alt"></i> Lịch ăn</button>
       </div>
     </div>
   `;
@@ -139,6 +295,8 @@ function buildPrintHtml(order) {
   const orderIdShort = order.$id ? order.$id.slice(-8) : "";
   const totalAmount = formatCurrency(Number(order.totalAmount || 0));
 
+  const paymentText = order.paymentMethod === 'qr' ? 'Chuyển khoản QR' : 'Tiền mặt';
+
   return `
     <html>
       <head>
@@ -169,6 +327,7 @@ function buildPrintHtml(order) {
           <div>Địa chỉ: ${escapeHtml(order.customerAddress || "")}</div>
           <div>Ngày đặt: ${formatDateTime(order.orderDate)}</div>
           <div>Hẹn giờ giao: ${formatDateTime(order.deliveryTime)}</div>
+          <div style="font-weight: bold; color: #4f46e5;">Thanh toán: ${paymentText}</div>
         </div>
         <table>
           <thead>
@@ -407,6 +566,7 @@ function startRealtimeMenuSchedule(app) {
     DB.COLLECTIONS.DISHES,
     DB.COLLECTIONS.COMBOS,
     DB.COLLECTIONS.COMBO_ITEMS,
+    "orders"
   ].filter(Boolean);
 
   const galleryCollections = [DB.COLLECTIONS.GALLERY_MEDIA].filter(Boolean);
@@ -423,6 +583,13 @@ function startRealtimeMenuSchedule(app) {
   if (!channels.length) return;
 
   realtimeUnsubscribe = client.subscribe(channels, (response) => {
+    const isNewOrder = response.events.some(e => e.includes(".orders.documents.create"));
+    
+    if (isNewOrder) {
+        refreshOrdersTable(app);
+        refreshOverviewPanel(app);
+    }
+
     const channel = response?.channels?.[0] || "";
     const isMenu = menuCollections.some((id) => channel.includes(`collections.${id}.`));
     const isGallery = galleryCollections.some((id) => channel.includes(`collections.${id}.`));
@@ -505,6 +672,7 @@ export async function renderDashboard(user) {
 
   app.innerHTML = `
     <section class="dashboard-shell">
+      ${ADMIN_STYLES}
       ${renderHeader(user)}
       ${renderTabs()}
       ${panelsMarkup}
@@ -536,14 +704,13 @@ export async function renderDashboard(user) {
   const applyAcceptUi = (acceptingOrders, kitchenOverloaded) => {
     if (!acceptBtn) return;
     const isPaused = acceptingOrders === false;
-    acceptBtn.textContent = isPaused ? "Đang tạm ngừng nhận đơn" : "Đang nhận đơn";
-    acceptBtn.style.background = isPaused
-      ? "rgba(239,68,68,0.22)"
-      : "rgba(16,185,129,0.16)";
-    acceptBtn.style.borderColor = isPaused
-      ? "rgba(239,68,68,0.55)"
-      : "rgba(16,185,129,0.35)";
-    acceptBtn.style.color = isPaused ? "#fecaca" : "#bbf7d0";
+    acceptBtn.innerHTML = isPaused ? '<i class="fas fa-pause-circle"></i> Tạm ngừng nhận đơn' : '<i class="fas fa-check-circle"></i> Đang nhận đơn';
+    
+    acceptBtn.className = isPaused ? 'logout-btn status-paused' : 'logout-btn status-active';
+    acceptBtn.style.background = isPaused ? "#fef2f2" : "#f0fdf4";
+    acceptBtn.style.border = isPaused ? "1px solid #fee2e2" : "1px solid #dcfce7";
+    acceptBtn.style.color = isPaused ? "#991b1b" : "#166534";
+
     acceptBtn.title = kitchenOverloaded ? "Bếp đang quá tải" : "Bật/tắt nhận đơn từ khách";
   };
 

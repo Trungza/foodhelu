@@ -37,7 +37,7 @@ function updateBadgeDisplay(badge, count) {
 
 function setUnreadCount(count) {
     saveUnreadCount(count);
-    const badge = document.querySelector('.bell-badge');
+    const badge = document.querySelector('#admin-bell-badge');
     updateBadgeDisplay(badge, count);
 }
 
@@ -93,10 +93,10 @@ function markAsReadById(notifId, listEl) {
 }
 
 export function initNotifications(root) {
-    const bell = root.querySelector('.admin-notification-bell');
-    const dropdown = root.querySelector('#notificationDropdown');
-    const badge = root.querySelector('.bell-badge');
-    const listEl = root.querySelector('#notificationList');
+    const bell = root.querySelector('#adminNotificationBell');
+    const dropdown = root.querySelector('#adminNotificationDropdown');
+    const badge = root.querySelector('#admin-bell-badge');
+    const listEl = root.querySelector('#adminNotificationList');
 
     if (!bell || !dropdown || !listEl) return;
 
@@ -219,8 +219,6 @@ export function initRealtimeNotifications() {
 
                 if (currentNote && currentNote !== previousNote) {
                     window.addNotification({
-                        title: "âš ï¸ Báº¿p bÃ¡o thiáº¿u mÃ³n",
-                        message: `ÄÆ¡n #${order.$id.slice(-6)} (${order.customerName || "KhÃ¡ch"}): "${currentNote}"`,
                         title: "⚠️ Bếp báo thiếu món",
                         message: `Đơn #${order.$id.slice(-6)} (${order.customerName || "Khách"}): "${currentNote}"`,
                         time: new Date().toLocaleString('vi-VN'),

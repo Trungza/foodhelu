@@ -1,5 +1,9 @@
 {
+  "scripts": {
+    "report:docx": "node scripts/generate-thesis-docx.js"
+  },
   "dependencies": {
+    "docx": "^8.5.0",
     "node-appwrite": "^24.0.0"
   }
 }

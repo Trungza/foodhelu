@@ -26,7 +26,7 @@ export async function renderOrdersTable({ status = 'all', search = '', loading =
 
     // Nếu chỉ yêu cầu loading, trả về bảng với spinner (không fetch dữ liệu)
     if (loading) {
-        const headers = ["Mã đơn", "Khách hàng", "Số điện thoại", "Ngày đặt", "Hẹn giờ giao", "Tổng tiền", "Trạng thái", "Hành động"];
+        const headers = ["Mã đơn", "Khách hàng", "SĐT", "Thời gian", "Tổng tiền", "Thanh toán", "Trạng thái", "Hành động"];
         return `
             <div class="admin-table">
                 <div class="table-header">
@@ -68,6 +68,11 @@ export async function renderOrdersTable({ status = 'all', search = '', loading =
             catch { return "Không xác định"; }
         };
 
+        const getPaymentBadge = (method) => {
+            if (method === 'qr') return '<span class="badge" style="background:#eef2ff; color:#4f46e5; border:1px solid #e0e7ff;"><i class="fas fa-university"></i> QR</span>';
+            return '<span class="badge" style="background:#f8fafc; color:#64748b; border:1px solid #e2e8f0;"><i class="fas fa-money-bill-wave"></i> TM</span>';
+        };
+
         const getStatusBadge = (status) => {
             const map = {
                 pending: '<span class="badge pending">Chờ xử lý</span>',
@@ -79,7 +84,7 @@ export async function renderOrdersTable({ status = 'all', search = '', loading =
             return map[status] || status;
         };
 
-        const headers = ["Mã đơn", "Khách hàng", "Số điện thoại", "Ngày đặt", "Hẹn giờ giao", "Tổng tiền", "Trạng thái", "Hành động"];
+        const headers = ["Mã đơn", "Khách hàng", "SĐT", "Thời gian", "Tổng tiền", "Thanh toán", "Trạng thái", "Hành động"];
 
         let rowsHtml = '';
         if (orders.length === 0) {
@@ -91,21 +96,24 @@ export async function renderOrdersTable({ status = 'all', search = '', loading =
                 const canPrint = order.status === STATUS.STEP_4;
                 const kitchenNoteValue = String(order?.kitchenNote || "").trim();
                 const kitchenNoteBadge = kitchenNoteValue
-                    ? `<span class="badge kitchen-note" title="${escapeHtml(`Bếp báo thiếu món: ${kitchenNoteValue}`)}">⚠️ kitchenNote</span>`
+                    ? `<span class="badge" style="background: #fff1f2; color: #e11d48; border: 1px solid #ffe4e6; margin-left: 5px; font-size: 10px;" title="${escapeHtml(`Bếp báo thiếu: ${kitchenNoteValue}`)}"><i class="fas fa-exclamation-triangle"></i> BẾP BÁO THIẾU</span>`
                     : "";
                 return `
                     <tr class="order-row-clickable" data-order-id="${order.$id}" style="cursor: pointer;">
                         <td>${order.$id.slice(-8)}</td>
                         <td>${escapeHtml(order.customerName)}</td>
                         <td>${escapeHtml(order.customerPhone)}</td>
-                        <td>${formatDateTime(order.orderDate)}</td>
-                        <td>${formatDateTime(order.deliveryTime)}</td>
+                        <td>
+                            <div style="font-size: 13px;">${formatDateTime(order.orderDate)}</div>
+                            ${order.deliveryTime ? `<div style="font-size: 11px; color: #4f46e5; font-weight: 600;"><i class="far fa-clock"></i> Hẹn: ${formatDateTime(order.deliveryTime)}</div>` : ''}
+                        </td>
                         <td>${formatCurrency(order.totalAmount)}</td>
+                        <td>${getPaymentBadge(order.paymentMethod)}</td>
                         <td class="order-status-cell">${getStatusBadge(order.status)}${kitchenNoteBadge}</td>
                         <td>
-                            ${canSend ? `<button class="action-btn send-kitchen" data-id="${order.$id}" title="Gửi xuống bếp">🍳</button>` : ''}
-                            ${canCancel ? `<button class="action-btn cancel-order" data-id="${order.$id}" title="Hủy đơn">🗑️</button>` : ''}
-                            ${canPrint ? `<button class="action-btn print-order" data-id="${order.$id}" title="In đơn">🖨️</button>` : ''}
+                            ${canSend ? `<button class="action-btn send-kitchen" data-id="${order.$id}" title="Gửi xuống bếp" style="background:#10b981; color:white; border:none; padding:5px 8px; border-radius:6px; cursor:pointer;"><i class="fas fa-fire"></i></button>` : ''}
+                            ${canCancel ? `<button class="action-btn cancel-order" data-id="${order.$id}" title="Hủy đơn" style="background:#ef4444; color:white; border:none; padding:5px 8px; border-radius:6px; cursor:pointer;"><i class="fas fa-times"></i></button>` : ''}
+                            ${canPrint ? `<button class="action-btn print-order" data-id="${order.$id}" title="In đơn" style="background:#3b82f6; color:white; border:none; padding:5px 8px; border-radius:6px; cursor:pointer;"><i class="fas fa-print"></i></button>` : ''}
                         </td>
                     </tr>
                 `;

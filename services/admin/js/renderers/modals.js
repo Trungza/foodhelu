@@ -25,11 +25,15 @@ export function renderEmployeeModal() {
 export function renderOrderModal() {
     return `
         <div id="orderModal" class="modal">
-            <div class="modal-content modal-content-wide">
-                <h3>📦 Chi tiết đơn hàng</h3>
-                <div id="orderDetailContent"></div>
+            <div class="modal-content modal-content-wide" style="border-radius: 1.5rem; overflow: hidden; padding: 0; border: none; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);">
+                <div class="modal-header" style="background: #f8fafc; padding: 1.5rem 2rem; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center;">
+                    <h3 style="margin: 0; color: #1e293b; font-size: 1.25rem; display: flex; align-items: center; gap: 0.75rem;">
+                        <i class="fas fa-receipt" style="color: #4f46e5;"></i> Chi tiết đơn hàng
+                    </h3>
+                </div>
+                <div id="orderDetailContent" style="padding: 2rem; max-height: 70vh; overflow-y: auto;"></div>
                 <div class="modal-actions">
-                    <button id="closeOrderModal" class="btn-secondary">Đóng</button>
+                    <button id="closeOrderModal" class="btn-secondary" style="border-radius: 0.75rem; font-weight: 600;">Đóng cửa sổ</button>
                 </div>
             </div>
         </div>

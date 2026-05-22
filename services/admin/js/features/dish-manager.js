@@ -1,4 +1,4 @@
-﻿﻿﻿﻿// services/admin/features/menu-manager-events.js
+﻿﻿﻿﻿﻿﻿// services/admin/features/menu-manager-events.js
 import {
   createCategory,
   createDish,
@@ -259,10 +259,10 @@ export function initMenuManagerEvents(root) {
     setModalContent(`
       <div style="display: flex; flex-direction: column; gap: 12px;">
     <input type="text" id="catName" placeholder="Tên danh mục" value="${category?.name || ""}" 
-           style="padding: 10px 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.05); color: #f8fafc; font-size: 14px; outline: none; transition: 0.2s;" />
+           style="padding: 10px 12px; border-radius: 8px; border: 1px solid #cbd5e1; background: #ffffff; color: #0f172a; font-size: 14px; outline: none; transition: 0.2s;" />
     <input type="number" id="catOrder" placeholder="Thứ tự" value="${category?.order || 0}" 
-           style="padding: 10px 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.05); color: #f8fafc; font-size: 14px; outline: none; transition: 0.2s;" />
-     <label><input type="checkbox" id="catActive" ${category?.isActive !== false ? "checked" : ""}> Hiển thị</label>
+           style="padding: 10px 12px; border-radius: 8px; border: 1px solid #cbd5e1; background: #ffffff; color: #0f172a; font-size: 14px; outline: none; transition: 0.2s;" />
+     <label style="color: #0f172a;"><input type="checkbox" id="catActive" ${category?.isActive !== false ? "checked" : ""}> Hiển thị</label>
     <textarea id="catDesc" placeholder="Mô tả" 
               style="padding: 10px 12px; border-radius: 8px; border: 1px solid rgba(148,163,184,0.2); background: rgba(255,255,255,0.96); color: #0f172a; font-size: 14px; outline: none; transition: 0.2s; min-height: 80px; resize: vertical;">${category?.description || ""}</textarea>
     

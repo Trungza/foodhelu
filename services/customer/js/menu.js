@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿// MENU.JS - TODAY COMBOS WITH OUT-OF-STOCK REPLACEMENTS (APPWRITE)
+﻿﻿﻿﻿﻿﻿﻿// MENU.JS - TODAY COMBOS WITH OUT-OF-STOCK REPLACEMENTS (APPWRITE)
 import { APPWRITE_CONFIG, DB } from "../../shared/js/config.js";
 import { databases, Query, DATABASE_ID, BUCKET_ID } from "../../shared/js/appwrite.js";
 
@@ -580,7 +580,7 @@ function createComboItemRow(comboId, item) {
     const triggerContentHtml = selectedReplacement
         ? `
             ${createDishThumbHTML(selectedReplacement.image || "", selectedReplacement.name || "Mon thay the", "replacement-selected-thumb")}
-            <span class="replacement-trigger-label">${escapeHtml(selectedReplacement.name)} (+$${selectedReplacement.price})</span>
+            <span class="replacement-trigger-label">${escapeHtml(selectedReplacement.name)} (+${selectedReplacement.price.toLocaleString('vi-VN')}đ)</span>
         `
         : `<span class="replacement-trigger-placeholder">Chon mon thay the</span>`;
     const menuOptionsHtml = replacements.map((replacement) => {
@@ -593,7 +593,7 @@ function createComboItemRow(comboId, item) {
             >
                 ${createDishThumbHTML(replacement.image || "", replacement.name || "Mon thay the", "replacement-option-thumb")}
                 <span class="replacement-option-name">${escapeHtml(replacement.name)}</span>
-                <span class="replacement-option-price">+$${replacement.price}</span>
+                <span class="replacement-option-price">+${replacement.price.toLocaleString('vi-VN')}đ</span>
             </button>
         `;
     }).join("");
@@ -640,8 +640,8 @@ function createMenuItemHTML(combo) {
                
                 <div class="menu-item-price-action">
                     <div class="price-group">
-                        <span class="original-price">$${combo.originalPrice}</span>
-                        <span class="discount-price">$${combo.discountPrice}</span>
+                        <span class="original-price">${combo.originalPrice.toLocaleString('vi-VN')}đ</span>
+                        <span class="discount-price">${combo.discountPrice.toLocaleString('vi-VN')}đ</span>
                     </div>
                     <button class="add-combo-btn" disabled><i class="fas fa-ban"></i></button>
                 </div>
@@ -664,8 +664,8 @@ function createMenuItemHTML(combo) {
             <div class="combo-items-list">${itemsHtml}</div>
             <div class="menu-item-price-action">
                 <div class="price-group">
-                    <span class="original-price" id="original_price_${combo.id}">$${pricing.originalPrice}</span>
-                    <span class="discount-price" id="price_${combo.id}">$${pricing.price}</span>
+                    <span class="original-price" id="original_price_${combo.id}">${pricing.originalPrice.toLocaleString('vi-VN')}đ</span>
+                    <span class="discount-price" id="price_${combo.id}">${pricing.price.toLocaleString('vi-VN')}đ</span>
                 </div>
                 <button class="add-combo-btn" onclick="addComboToCart('${escapeHtml(combo.id)}')"><i class="fas fa-plus"></i></button>
             </div>
@@ -764,8 +764,8 @@ function applyReplacementSelection(comboId, itemDishId, selectedDishId) {
     const pricing = getCurrentComboPricing(combo, menuState.selectionsByComboId[comboKey]);
     const originalPriceEl = document.getElementById(`original_price_${comboId}`);
     const priceEl = document.getElementById(`price_${comboId}`);
-    if (originalPriceEl) originalPriceEl.textContent = `$${pricing.originalPrice}`;
-    if (priceEl) priceEl.textContent = `$${pricing.price}`;
+    if (originalPriceEl) originalPriceEl.textContent = `${pricing.originalPrice.toLocaleString('vi-VN')}đ`;
+    if (priceEl) priceEl.textContent = `${pricing.price.toLocaleString('vi-VN')}đ`;
 
     renderCombos(menuState.combos);
 }

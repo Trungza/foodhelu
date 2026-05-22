@@ -103,6 +103,11 @@ function renderResults(orders) {
         // 3. Xử lý nhãn thời gian hẹn (nếu có)
         const scheduledLabel = order.deliveryTime ? `<div style="color: #0369a1; font-weight: 500;"><i class="far fa-clock"></i> Hẹn giao: ${new Date(order.deliveryTime).toLocaleString('vi-VN')}</div>` : '';
 
+        // 4. Xử lý phương thức thanh toán
+        const payMethodLabel = order.paymentMethod === 'qr' ? 
+            '<span style="color:#2563eb;"><i class="fas fa-university"></i> Chuyển khoản QR</span>' : 
+            '<span style="color:#64748b;"><i class="fas fa-wallet"></i> Tiền mặt</span>';
+
         return `
             <div class="track-item">
                 <div class="track-item-header">
@@ -114,6 +119,7 @@ function renderResults(orders) {
                     <div>Khách hàng: <strong>${escapeHtml(order.customerName)}</strong></div>
                     <div><i class="fas fa-map-marker-alt"></i> ${escapeHtml(order.customerAddress)}</div>
                     <div><i class="far fa-calendar-alt"></i> Đặt lúc: ${orderDate}</div>
+                    <div><i class="fas fa-credit-card"></i> Thanh toán: ${payMethodLabel}</div>
                     ${scheduledLabel}
                 </div>
 

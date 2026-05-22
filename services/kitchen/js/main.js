@@ -174,6 +174,12 @@ function renderDashboard(user) {
     subscribeSystemSettings((s) => applyOverloadUi(s.kitchenOverloaded));
   }
 
+  // Lắng nghe sự kiện đơn hàng mới thông qua Event Bus hoặc Realtime
+  // Đây là logic bổ trợ để kích hoạt âm thanh khi realtime.js nhận được tín hiệu
+  window.addEventListener("new-kitchen-order", () => {
+    playKitchenSound();
+  });
+
   attachOrdersEvents();
   setOrdersRefreshCallback(() => renderOrders(user));
   renderOrders(user);

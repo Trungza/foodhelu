@@ -38,7 +38,49 @@ export function injectMealScheduleStyles() {
         }
         .meal-dish-option-thumb, .meal-combo-option-thumb { width: 100%; height: 100%; object-fit: cover; }
         .meal-dish-option-meta { margin-left: 12px; flex-grow: 1; min-width: 0; }
-        .meal-dish-option-name { font-size: 14px; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .meal-dish-option-name { font-size: 14px; font-weight: 600; color: #0f172a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+        /* Tiêu đề và nhãn văn bản */
+        .modal-head h3 { color: #0f172a !important; }
+        .meal-picked-title { font-size: 16px; font-weight: 700; color: #0f172a; margin: 24px 0 12px; }
+        
+        /* Danh sách món đã chọn (Picked Items) */
+        .meal-picked-list { 
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); 
+            gap: 12px; list-style: none; padding: 0; margin: 0;
+        }
+        .meal-picked-card { 
+            display: flex; align-items: center; padding: 12px; background: #ffffff; border: 1px solid #e2e8f0; 
+            border-radius: 16px; gap: 12px; position: relative; box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+        .meal-picked-thumb-wrap { 
+            width: 44px; height: 44px; border-radius: 10px; overflow: hidden; flex-shrink: 0; 
+            background: #f1f5f9; display: flex; align-items: center; justify-content: center;
+        }
+        .meal-picked-thumb { width: 100%; height: 100%; object-fit: cover; }
+        .meal-picked-no-thumb { font-size: 10px; color: #94a3b8; font-weight: 700; }
+        .meal-picked-meta { flex: 1; min-width: 0; }
+        .meal-picked-meta strong { 
+            display: block; font-size: 14px; font-weight: 600; color: #0f172a; 
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 4px;
+        }
+        .meal-picked-price-input { 
+            width: 100px; padding: 4px 8px; border: 1px solid #cbd5e1; border-radius: 6px; 
+            font-size: 13px; color: #0f172a; background: #ffffff; outline: none; transition: border-color 0.2s;
+        }
+        .meal-picked-price-input:focus { border-color: #3b82f6; }
+        .meal-dish-remove-btn { 
+            background: none; border: none; font-size: 20px; color: #94a3b8; cursor: pointer; 
+            padding: 4px; line-height: 1; transition: all 0.2s; border-radius: 50%; width: 28px; height: 28px;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .meal-dish-remove-btn:hover { background: #fee2e2; color: #ef4444; }
+
+        /* Điều hướng và Tab */
+        .meal-week-tab-btn { color: #475569 !important; }
+        .meal-week-tab-btn.active { color: #3b82f6 !important; font-weight: 700; }
+        .meal-category-nav-item { color: #64748b; font-weight: 500; }
+
         .meal-dish-option-price-tag { font-size: 13px; font-weight: 700; color: #10b981;display:block }
         .meal-dish-option-indicator { color: #3b82f6; display: none; margin-left: auto; }
         .meal-dish-option.active .meal-dish-option-indicator { display: block; }
@@ -62,7 +104,18 @@ export function injectMealScheduleStyles() {
         }
 
         .meal-modal-search { position: relative; margin-bottom: 12px; display: flex; align-items: center; }
-        .meal-search-input { width: 100%; padding: 8px 12px 8px 36px; border: 1px solid #e2e8f0; border-radius: 8px; outline: none; }
+        .meal-search-input, .order-status-filter, .search-input { 
+            width: 100%; 
+            padding: 8px 12px 8px 36px; 
+            border: 1px solid #cbd5e1; 
+            border-radius: 8px; 
+            outline: none; 
+            color: #0f172a !important; 
+            background: #ffffff !important;
+            font-size: 14px;
+            height: 40px;
+        }
+        .order-status-filter { padding-left: 12px !important; cursor: pointer; }
         
         .modal-content-menu {
             max-width: 1100px !important;
@@ -82,8 +135,8 @@ export function injectMealScheduleStyles() {
             border: 1px solid #e2e8f0;
             border-radius: 8px;
             font-size: 14px;
-            color: #f8fafc;
-            background:transparent;
+            color: #0f172a;
+            background: #ffffff;
         }
         .combo-total-price {
             font-size: 18px;
@@ -105,9 +158,9 @@ export function injectMealScheduleStyles() {
     margin-top: 12px;
 }
 .meal-combo-card {
-    background: var(--card, rgba(255,255,255,0.06));
+    background: #ffffff;
     backdrop-filter: blur(10px);
-    border: 1px solid var(--border, rgba(255,255,255,0.08));
+    border: 1px solid #e2e8f0;
     border-radius: 16px;
     padding: 12px;
     transition: all 0.2s;
@@ -125,7 +178,7 @@ export function injectMealScheduleStyles() {
 .meal-combo-head strong {
     font-size: 14px;
     font-weight: 600;
-    color: var(--text, #e5e7eb);
+    color: #0f172a;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -136,7 +189,7 @@ export function injectMealScheduleStyles() {
     border: none;
     font-size: 18px;
     cursor: pointer;
-    color: var(--muted, #94a3b8);
+    color: #64748b;
 }
 .meal-combo-remove-btn:hover {
     color: #ef4444;
@@ -151,7 +204,7 @@ export function injectMealScheduleStyles() {
     display: flex;
     align-items: center;
     gap: 6px;
-    background: rgba(0,0,0,0.3);
+    background: #f8fafc;
     padding: 6px;
     border-radius: 10px;
 }
@@ -171,7 +224,7 @@ export function injectMealScheduleStyles() {
 .meal-combo-item-name {
     font-size: 12px;
     font-weight: 500;
-    color: var(--text, #e5e7eb);
+    color: #475569;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -182,19 +235,19 @@ export function injectMealScheduleStyles() {
     justify-content: space-between;
     margin-top: 8px;
     padding-top: 8px;
-    border-top: 1px solid var(--border, rgba(255,255,255,0.08));
+    border-top: 1px solid #e2e8f0;
     font-size: 13px;
     font-weight: 500;
-    color: var(--text, #e5e7eb);
+    color: #0f172a;
 }
 .meal-combo-price-input {
     width: 100px;
     padding: 4px 8px;
-    background: rgba(0,0,0,0.4);
-    border: 1px solid var(--border, rgba(255,255,255,0.15));
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
     border-radius: 6px;
     font-size: 12px;
-    color: var(--text, #e5e7eb);
+    color: #0f172a;
     text-align: right;
 }
     .meal-category-nav-item.active {
@@ -456,8 +509,8 @@ export function showCreateComboModal({ title, categories, dishesByCategory, sele
                 </div>
                 <div class="menu-modal-body">
                     <input id="mealComboName" type="text" class="admin-input" placeholder="Tên combo" style="margin-bottom:10px" />
-                    <div class="meal-combo-category-tabs" style="display: flex; gap: 20px; border-bottom: 2px solid rgba(255,255,255,0.2); margin-bottom: 20px;">
-                        ${categories.map((c, i) => `<button class="meal-category-nav-item ${i === 0 ? 'active' : ''}" data-id="${c.id}" style="background: none; border: none; padding: 8px 0; font-size: 14px; font-weight: 500; color: rgba(255,255,255,0.6); cursor: pointer; position: relative; transition: 0.3s;text-align:center">${c.label}</button>`).join("")}
+                    <div class="meal-combo-category-tabs" style="display: flex; gap: 20px; border-bottom: 2px solid #e2e8f0; margin-bottom: 20px;">
+                        ${categories.map((c, i) => `<button class="meal-category-nav-item ${i === 0 ? 'active' : ''}" data-id="${c.id}" style="background: none; border: none; padding: 8px 0; font-size: 14px; font-weight: 500; color: #64748b; cursor: pointer; position: relative; transition: 0.3s;text-align:center">${c.label}</button>`).join("")}
                     </div>
                     <div class="meal-combo-picker-list"></div>
                 </div>
