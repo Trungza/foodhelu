@@ -1,6 +1,7 @@
 import { calculateStats, getAllStats, fetchOrdersInRange } from "../renderers/revenue-stats.js";
 import { formatCurrency } from "../core/formatters.js";
 import { showToast } from "../../../shared/components/toast.js";
+import { escapeHtml } from "../../../shared/js/utils.js"; // Import escapeHtml
 
 /**
  * Calculate date range for custom stats
@@ -142,8 +143,8 @@ function generatePdfHtml(stats, rangeType) {
             return `
                 <tr>
                     <td>#${orderIdShort}</td>
-                    <td>${order.customerName || ""}</td>
-                    <td>${order.customerPhone || ""}</td>
+                    <td>${escapeHtml(order.customerName || "")}</td>
+                    <td>${escapeHtml(order.customerPhone || "")}</td>
                     <td style="text-align: right;">${formatCurrency(order.totalAmount || 0)}</td>
                     <td>${createdDate}</td>
                 </tr>
@@ -334,6 +335,174 @@ export async function exportToPdf(stats, rangeType) {
 }
 
 /**
+ * Chart instances for cleanup
+ */
+let revenueChartInstance = null;
+let topDishesChartInstance = null;
+
+// Theo dõi thống kê hiện tại đang được xem (để dùng cho các nút ở Header)
+let currentViewStats = null;
+let currentViewRange = "day";
+
+/**
+ * Process data for Revenue line chart
+ */
+function processTimeData(orders, rangeType, startDate) {
+    const labels = [];
+    const values = [];
+    const dataMap = new Map();
+
+    if (rangeType === "day") {
+        for (let i = 0; i < 24; i++) {
+            labels.push(`${i}h`);
+            dataMap.set(i, 0);
+        }
+        orders.forEach(o => {
+            const hour = new Date(o.$createdAt).getHours();
+            const amount = o.categoryRevenue !== undefined ? o.categoryRevenue : (o.totalAmount || 0);
+            dataMap.set(hour, (dataMap.get(hour) || 0) + amount);
+        });
+        labels.forEach((_, i) => values.push(dataMap.get(i)));
+    } else if (rangeType === "week") {
+        const days = ["T2", "T3", "T4", "T5", "T6", "T7", "CN"];
+        days.forEach((d, i) => {
+            labels.push(d);
+            dataMap.set(i, 0);
+        });
+        orders.forEach(o => {
+            const jsDay = new Date(o.$createdAt).getDay(); // 0 is Sunday
+            const index = jsDay === 0 ? 6 : jsDay - 1;
+            const amount = o.categoryRevenue !== undefined ? o.categoryRevenue : (o.totalAmount || 0);
+            dataMap.set(index, (dataMap.get(index) || 0) + amount);
+        });
+        labels.forEach((_, i) => values.push(dataMap.get(i)));
+    } else if (rangeType === "month") {
+        const daysInMonth = new Date(startDate.getFullYear(), startDate.getMonth() + 1, 0).getDate();
+        for (let i = 1; i <= daysInMonth; i++) {
+            labels.push(i.toString());
+            dataMap.set(i, 0);
+        }
+        orders.forEach(o => {
+            const day = new Date(o.$createdAt).getDate();
+            const amount = o.categoryRevenue !== undefined ? o.categoryRevenue : (o.totalAmount || 0);
+            dataMap.set(day, (dataMap.get(day) || 0) + amount);
+        });
+        labels.forEach(l => values.push(dataMap.get(parseInt(l))));
+    } else if (rangeType === "year") {
+        const months = ["Th1", "Th2", "Th3", "Th4", "Th5", "Th6", "Th7", "Th8", "Th9", "Th10", "Th11", "Th12"];
+        months.forEach((m, i) => {
+            labels.push(m);
+            dataMap.set(i, 0);
+        });
+        orders.forEach(o => {
+            const month = new Date(o.$createdAt).getMonth();
+            const amount = o.categoryRevenue !== undefined ? o.categoryRevenue : (o.totalAmount || 0);
+            dataMap.set(month, (dataMap.get(month) || 0) + amount);
+        });
+        labels.forEach((_, i) => values.push(dataMap.get(i)));
+    }
+
+    return { labels, values };
+}
+
+/**
+ * Calculate top selling dishes from order items
+ */
+function calculateTopDishes(orders) {
+    const dishMap = new Map();
+    orders.forEach(order => {
+        let items = [];
+        try {
+            items = typeof order.items === 'string' ? JSON.parse(order.items) : (order.items || []);
+        } catch (e) { items = []; }
+        
+        items.forEach(item => {
+            const name = item.name || item.dishName;
+            const qty = Number(item.quantity || 0);
+            if (name) {
+                dishMap.set(name, (dishMap.get(name) || 0) + qty);
+            }
+        });
+    });
+    return Array.from(dishMap.entries())
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 6);
+}
+
+/**
+ * Render charts using Chart.js
+ */
+async function updateCharts(container, stats, rangeType) {
+    if (!window.Chart) {
+        await new Promise(resolve => {
+            const script = document.createElement('script');
+            script.src = 'https://cdn.jsdelivr.net/npm/chart.js';
+            script.onload = resolve;
+            document.head.appendChild(script);
+        });
+    }
+
+    const ctxRevenue = container.querySelector("#revenueChart")?.getContext("2d");
+    const ctxDishes = container.querySelector("#topDishesChart")?.getContext("2d");
+
+    if (!ctxRevenue || !ctxDishes) return;
+
+    // 1. Line Chart cho Doanh thu
+    const timeData = processTimeData(stats.orders, rangeType, new Date(stats.startDate));
+    if (revenueChartInstance) revenueChartInstance.destroy();
+    revenueChartInstance = new Chart(ctxRevenue, {
+        type: 'line',
+        data: {
+            labels: timeData.labels,
+            datasets: [{
+                label: 'Doanh thu (VND)',
+                data: timeData.values,
+                borderColor: '#4f46e5',
+                backgroundColor: 'rgba(79, 70, 229, 0.1)',
+                fill: true,
+                tension: 0.4,
+                pointRadius: 4
+            }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+    });
+
+    // 2. Doughnut Chart cho Món bán chạy
+    const topDishes = calculateTopDishes(stats.orders);
+    if (topDishesChartInstance) topDishesChartInstance.destroy();
+    topDishesChartInstance = new Chart(ctxDishes, {
+        type: 'doughnut',
+        data: {
+            labels: topDishes.map(d => d[0]),
+            datasets: [{
+                data: topDishes.map(d => d[1]),
+                backgroundColor: ['#4f46e5', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#6366f1']
+            }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+    });
+}
+
+/**
+ * Hàm hỗ trợ in báo cáo
+ */
+function printReport(stats, rangeType) {
+    const htmlContent = generatePdfHtml(stats, rangeType);
+    const printWindow = window.open("", "_blank", "width=1000,height=800");
+    
+    if (!printWindow) {
+        showToast("Không thể mở cửa sổ in. Hãy kiểm tra chặn pop-up.", "error");
+        return;
+    }
+
+    printWindow.document.open();
+    printWindow.document.write(htmlContent);
+    printWindow.document.close();
+    printWindow.focus();
+    setTimeout(() => printWindow.print(), 250);
+}
+
+/**
  * Initialize revenue stats feature
  */
 export async function initRevenueStatsFeature(app) {
@@ -345,8 +514,10 @@ export async function initRevenueStatsFeature(app) {
     if (exportPdfBtn) {
         exportPdfBtn.addEventListener("click", async () => {
             try {
-                const stats = await getAllStats();
-                await exportToPdf(stats.day, "day");
+                const allStats = await getAllStats();
+                const stats = currentViewStats || allStats.day;
+                const range = currentViewStats ? currentViewRange : "day";
+                await exportToPdf(stats, range);
                 showToast("Đang xuất PDF...", "success");
             } catch (error) {
                 console.error("Error exporting PDF:", error);
@@ -360,8 +531,10 @@ export async function initRevenueStatsFeature(app) {
     if (exportExcelBtn) {
         exportExcelBtn.addEventListener("click", async () => {
             try {
-                const stats = await getAllStats();
-                await exportToExcel(stats.day, "day");
+                const allStats = await getAllStats();
+                const stats = currentViewStats || allStats.day;
+                const range = currentViewStats ? currentViewRange : "day";
+                await exportToExcel(stats, range);
             } catch (error) {
                 console.error("Error exporting Excel:", error);
                 showToast("Lỗi xuất Excel: " + error.message, "error");
@@ -374,23 +547,10 @@ export async function initRevenueStatsFeature(app) {
     if (printStatsBtn) {
         printStatsBtn.addEventListener("click", async () => {
             try {
-                const stats = await getAllStats();
-                const htmlContent = generatePdfHtml(stats.day, "day");
-                const printWindow = window.open("", "_blank", "width=1000,height=800");
-                
-                if (!printWindow) {
-                    showToast("Không thể mở cửa sổ in. Hãy kiểm tra chặn pop-up.", "error");
-                    return;
-                }
-
-                printWindow.document.open();
-                printWindow.document.write(htmlContent);
-                printWindow.document.close();
-                printWindow.focus();
-                
-                setTimeout(() => {
-                    printWindow.print();
-                }, 250);
+                const allStats = await getAllStats();
+                const stats = currentViewStats || allStats.day;
+                const range = currentViewStats ? currentViewRange : "day";
+                printReport(stats, range);
             } catch (error) {
                 console.error("Error printing stats:", error);
                 showToast("Lỗi in thống kê: " + error.message, "error");
@@ -398,12 +558,37 @@ export async function initRevenueStatsFeature(app) {
         });
     }
 
+    // Xử lý sự kiện in nhanh từ các thẻ thống kê (Ngày, Tuần, Tháng, Năm)
+    container.addEventListener("click", async (e) => {
+        const printBtn = e.target.closest(".btn-card-print");
+        const excelBtn = e.target.closest(".btn-card-excel");
+
+        if (printBtn) {
+            const range = printBtn.dataset.range;
+            try {
+                const allStats = await getAllStats();
+                printReport(allStats[range], range);
+            } catch (err) {
+                showToast("Lỗi in: " + err.message, "error");
+            }
+        } else if (excelBtn) {
+            const range = excelBtn.dataset.range;
+            try {
+                const allStats = await getAllStats();
+                await exportToExcel(allStats[range], range);
+            } catch (err) {
+                showToast("Lỗi xuất Excel: " + err.message, "error");
+            }
+        }
+    });
+
     // Handle custom date selection
     const applyCustomDateBtn = container.querySelector("#applyCustomDateBtn");
     if (applyCustomDateBtn) {
         applyCustomDateBtn.addEventListener("click", async () => {
             const dateInput = container.querySelector("#customDateInput");
             const rangeSelect = container.querySelector("#customRangeSelect");
+            const categorySelect = container.querySelector("#customCategorySelect");
             
             if (!dateInput.value) {
                 showToast("Vui lòng chọn ngày", "warning");
@@ -412,7 +597,11 @@ export async function initRevenueStatsFeature(app) {
 
             try {
                 const rangeType = rangeSelect.value || "day";
-                const stats = await calculateStats(rangeType, dateInput.value);
+                const categoryId = categorySelect.value || null;
+                const stats = await calculateStats(rangeType, dateInput.value, categoryId);
+                
+                currentViewStats = stats;
+                currentViewRange = rangeType;
                 
                 const resultLabel = container.querySelector("#resultLabel");
                 const resultRevenue = container.querySelector("#resultRevenue");
@@ -439,5 +628,15 @@ export async function initRevenueStatsFeature(app) {
     if (dateInput) {
         const today = new Date().toISOString().split("T")[0];
         dateInput.value = today;
+    }
+
+    // Tải biểu đồ mặc định cho hôm nay
+    try {
+        const stats = await getAllStats();
+        if (stats.day) {
+            await updateCharts(container, stats.day, "day");
+        }
+    } catch (error) {
+        console.error("Error loading initial charts:", error);
     }
 }

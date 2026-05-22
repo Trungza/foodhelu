@@ -595,26 +595,37 @@ function startRealtimeMenuSchedule(app) {
     const isGallery = galleryCollections.some((id) => channel.includes(`collections.${id}.`));
     const isSchedule = scheduleCollections.some((id) => channel.includes(`collections.${id}.`));
 
+    // Lấy tab hiện tại để tránh refresh các panel không hiển thị
+    const activeTab = app.querySelector('.tab-btn.active')?.getAttribute('data-tab');
+
     if (isMenu) {
+      if (activeTab !== 'menu' && activeTab !== 'overview') return;
       clearTimeout(menuRefreshTimer);
       menuRefreshTimer = setTimeout(async () => {
         await refreshMenuPanel(app);
-      }, 300);
+      }, 1000); // Tăng lên 1s để đợi các thay đổi hàng loạt hoàn tất
     }
 
     if (isGallery) {
+      if (activeTab !== 'gallery') return;
       clearTimeout(galleryRefreshTimer);
       galleryRefreshTimer = setTimeout(async () => {
         await refreshGalleryPanel(app);
-      }, 300);
+      }, 1000);
     }
 
     if (isSchedule) {
+      // Nếu đang ở tab lịch hoặc tổng quan thì mới refresh
+      const shouldRefresh = activeTab === 'schedule' || activeTab === 'overview';
+      if (!shouldRefresh) return;
+
       clearTimeout(scheduleRefreshTimer);
       scheduleRefreshTimer = setTimeout(() => {
-        refreshSchedulePanel(app);
-        refreshOverviewPanel(app);
-      }, 300);
+        // Chỉ refresh khi thực sự cần thiết để tránh lag
+        if (activeTab === 'schedule') refreshSchedulePanel(app);
+        if (activeTab === 'overview') refreshOverviewPanel(app);
+        console.log("Realtime: Schedule panel refreshed after batch update.");
+      }, 1500); // Tăng thời gian debounce cho các thao tác đăng lịch nặng
     }
   });
 }

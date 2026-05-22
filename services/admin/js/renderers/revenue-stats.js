@@ -1,7 +1,8 @@
 import { databases, DATABASE_ID, Query } from "../../../shared/js/appwrite.js";
 import { DB } from "../../../shared/js/config.js";
-import { STATUS } from "../../../shared/js/utils.js";
+import { STATUS, escapeHtml } from "../../../shared/js/utils.js";
 import { formatCurrency } from "../core/formatters.js";
+import { fetchAllCategories, getDishesByCategory } from "../data/menu-service.js";
 
 const COLLECTIONS = DB.COLLECTIONS;
 
@@ -76,12 +77,40 @@ export async function fetchOrdersInRange(startDate, endDate) {
 /**
  * Calculate statistics for a date range
  */
-export async function calculateStats(rangeType, customDate = null) {
+export async function calculateStats(rangeType, customDate = null, categoryId = null) {
     const { startDate, endDate } = getDateRange(rangeType, customDate);
     const orders = await fetchOrdersInRange(startDate, endDate);
 
-    const totalRevenue = orders.reduce((sum, order) => sum + (Number(order.totalAmount) || 0), 0);
-    const completedOrders = orders.length;
+    let totalRevenue = 0;
+    let filteredOrders = [];
+
+    if (categoryId) {
+        // Lấy danh sách món thuộc danh mục để đối chiếu
+        const categoryDishes = await getDishesByCategory(categoryId);
+        const dishIds = new Set(categoryDishes.map(d => d.$id));
+
+        orders.forEach(order => {
+            let items = [];
+            try { items = JSON.parse(order.items || "[]"); } catch (e) { items = []; }
+
+            let revenueFromCategory = 0;
+            items.forEach(item => {
+                if (dishIds.has(item.dishId)) {
+                    revenueFromCategory += (Number(item.price) || 0) * (Number(item.quantity) || 0);
+                }
+            });
+
+            if (revenueFromCategory > 0) {
+                totalRevenue += revenueFromCategory;
+                filteredOrders.push({ ...order, categoryRevenue: revenueFromCategory });
+            }
+        });
+    } else {
+        totalRevenue = orders.reduce((sum, order) => sum + (Number(order.totalAmount) || 0), 0);
+        filteredOrders = orders;
+    }
+
+    const completedOrders = filteredOrders.length;
     const avgOrderValue = completedOrders > 0 ? totalRevenue / completedOrders : 0;
 
     return {
@@ -91,7 +120,7 @@ export async function calculateStats(rangeType, customDate = null) {
         totalRevenue,
         completedOrders,
         avgOrderValue,
-        orders,
+        orders: filteredOrders,
     };
 }
 
@@ -145,10 +174,22 @@ function formatDisplayDate(dateStr, rangeType) {
 export async function renderRevenueStats() {
     try {
         const stats = await getAllStats();
+        const allCategories = await fetchAllCategories();
         const dayStats = stats.day;
         const weekStats = stats.week;
         const monthStats = stats.month;
         const yearStats = stats.year;
+
+        const cardActionsHtml = (range) => `
+            <div style="display: flex; gap: 4px;">
+                <button class="btn-card-excel" data-range="${range}" title="Xuất Excel ${range}" style="background:none; border:none; color:#10b981; cursor:pointer; padding:4px;">
+                    <i class="fas fa-file-excel"></i>
+                </button>
+                <button class="btn-card-print" data-range="${range}" title="In báo cáo ${range}" style="background:none; border:none; color:#64748b; cursor:pointer; padding:4px;">
+                    <i class="fas fa-print"></i>
+                </button>
+            </div>
+        `;
 
         const statCardHtml = (label, revenue, orders, avg) => `
             <div class="stat-card">
@@ -181,21 +222,33 @@ export async function renderRevenueStats() {
                 <div class="stats-grid">
                     <div class="stats-row">
                         <div class="stats-col">
-                            <h3><i class="fas fa-calendar-day"></i> Hôm Nay</h3>
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                <h3 style="margin: 0;"><i class="fas fa-calendar-day"></i> Hôm Nay</h3>
+                                ${cardActionsHtml("day")}
+                            </div>
                             ${statCardHtml("", dayStats.totalRevenue, dayStats.completedOrders, dayStats.avgOrderValue)}
                         </div>
                         <div class="stats-col">
-                            <h3><i class="fas fa-calendar-week"></i> Tuần Này</h3>
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                <h3 style="margin: 0;"><i class="fas fa-calendar-week"></i> Tuần Này</h3>
+                                ${cardActionsHtml("week")}
+                            </div>
                             ${statCardHtml("", weekStats.totalRevenue, weekStats.completedOrders, weekStats.avgOrderValue)}
                         </div>
                     </div>
                     <div class="stats-row">
                         <div class="stats-col">
-                            <h3><i class="fas fa-calendar"></i> Tháng Này</h3>
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                <h3 style="margin: 0;"><i class="fas fa-calendar"></i> Tháng Này</h3>
+                                ${cardActionsHtml("month")}
+                            </div>
                             ${statCardHtml("", monthStats.totalRevenue, monthStats.completedOrders, monthStats.avgOrderValue)}
                         </div>
                         <div class="stats-col">
-                            <h3><i class="fas fa-calendar-alt"></i> Năm Nay</h3>
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                <h3 style="margin: 0;"><i class="fas fa-calendar-alt"></i> Năm Nay</h3>
+                                ${cardActionsHtml("year")}
+                            </div>
                             ${statCardHtml("", yearStats.totalRevenue, yearStats.completedOrders, yearStats.avgOrderValue)}
                         </div>
                     </div>
@@ -204,6 +257,10 @@ export async function renderRevenueStats() {
                 <div class="custom-date-section">
                     <h3>📅 Thống kê Tùy Chọn</h3>
                     <div class="custom-date-controls">
+                        <select id="customCategorySelect" class="range-select">
+                            <option value="">Tất cả danh mục</option>
+                            ${allCategories.map(c => `<option value="${c.$id}">${escapeHtml(c.name)}</option>`).join('')}
+                        </select>
                         <input type="date" id="customDateInput" class="date-input" />
                         <select id="customRangeSelect" class="range-select">
                             <option value="day">Ngày</option>
@@ -247,8 +304,8 @@ export async function renderRevenueStats() {
                                             return `
                                         <tr>
                                             <td>#${orderIdShort}</td>
-                                            <td>${order.customerName || ""}</td>
-                                            <td>${order.customerPhone || ""}</td>
+                                            <td>${escapeHtml(order.customerName || "")}</td>
+                                            <td>${escapeHtml(order.customerPhone || "")}</td>
                                             <td class="price-cell">${formatCurrency(order.totalAmount || 0)}</td>
                                             <td>${createdDate}</td>
                                         </tr>
