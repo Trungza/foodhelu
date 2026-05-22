@@ -154,6 +154,12 @@ const ADMIN_STYLES = `
     .badge.confirmed { background: #dbeafe; color: #1e40af; }
     .badge.completed { background: #dcfce7; color: #166534; }
 
+    /* Màu chữ đen cho trạng thái hết món và badge Combo trong tracker để dễ nhìn hơn */
+    .today-dish-status-pill.out,
+    .today-dish-track-combo-badge {
+        color: #000000 !important;
+    }
+
     /* Notification Bell Styles */
     .admin-notification-bell {
         position: relative;
@@ -268,6 +274,8 @@ function renderHeader(user) {
       <div>
         <h1>Helu Food Admin</h1>
         <p>Chào ngày mới, quản trị viên!</p>
+     
+      
       </div>
       <div class="header-right">
         <button id="acceptOrdersBtn" class="logout-btn"></button>
