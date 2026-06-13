@@ -253,6 +253,10 @@ function normalizeCategoryKey(value) {
     return raw || "__uncategorized__";
 }
 
+function isComboCategory(value) {
+    return normalizeText(value) === "combo";
+}
+
 function groupItemsByCategory(items) {
     const grouped = new Map();
     (items || []).forEach((item) => {
@@ -339,6 +343,7 @@ function renderOrdersPanel(root, state) {
     const panelsHtml = groups.map((group) => {
         const key = normalizeCategoryKey(group.name);
         const isActive = key === state.activeCategoryKey;
+        const isComboTab = isComboCategory(group.name) || isComboCategory(key);
 
         const rowsHtml = group.items.map((item) => {
             const status = getItemStatus(item);
@@ -352,6 +357,17 @@ function renderOrdersPanel(root, state) {
                 ? `<span class="today-dish-track-combo-badge">Combo</span>`
                 : "";
             const comboSummaryHtml = item?.isCombo ? renderComboItemsSummary(item.comboItems) : "";
+            const controlsHtml = isComboTab
+                ? ""
+                : `
+                    <div class="today-dish-track-controls">
+                        <label>
+                            Còn lại
+                            <input type="number" min="0" step="1" class="today-dish-remaining-input" data-dish-id="${escapeHtml(item.id)}" value="${remainingQty}" />
+                        </label>
+                        <span class="today-dish-status-pill ${status}">${statusText}</span>
+                    </div>
+                `;
 
             return `
                 <article class="today-dish-track-item" data-dish-id="${escapeHtml(item.id)}">
@@ -365,13 +381,7 @@ function renderOrdersPanel(root, state) {
                             ${comboSummaryHtml}
                         </div>
                     </div>
-                    <div class="today-dish-track-controls">
-                        <label>
-                            Còn lại
-                            <input type="number" min="0" step="1" class="today-dish-remaining-input" data-dish-id="${escapeHtml(item.id)}" value="${remainingQty}" />
-                        </label>
-                        <span class="today-dish-status-pill ${status}">${statusText}</span>
-                    </div>
+                    ${controlsHtml}
                 </article>
             `;
         }).join("");

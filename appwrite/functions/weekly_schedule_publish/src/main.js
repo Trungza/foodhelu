@@ -1,4 +1,4 @@
-const sdk = require("node-appwrite");
+//const sdk = require("node-appwrite");
 
 const DATABASE_ID = process.env.APPWRITE_DATABASE_ID || "69eb95be00398251344a";
 const DAILY_MENU_COLLECTION_ID = "daily_menu";

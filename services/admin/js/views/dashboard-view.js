@@ -306,6 +306,7 @@ function renderTabs() {
         <button class="tab-btn" data-tab="menu"><i class="fas fa-utensils"></i> Thực đơn</button>
         <button class="tab-btn" data-tab="gallery"><i class="fas fa-images"></i> Thư viện</button>
         <button class="tab-btn" data-tab="schedule"><i class="fas fa-calendar-alt"></i> Lịch ăn</button>
+         
       </div>
     </div>
   `;

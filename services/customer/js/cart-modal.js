@@ -520,14 +520,14 @@ async function submitOrder() {
     const orderId = 'ORD_' + shortId;
     const currentDateTime = new Date().toISOString(); // orderDate
     
-    // Chuẩn bị dữ liệu đơn hàng theo đúng cấu trúc collection orders
+
     const orderData = {
         customerName: customerName,
-        customerPhone: customerPhone, // Re-typed to ensure no hidden characters
+        customerPhone: customerPhone, 
         customerAddress: customerAddress,
-        totalAmount: total,                     // trường bắt buộc (integer)
-        orderDate: currentDateTime,            // trường bắt buộc (datetime)
-        status: 'pending',                     // trường bắt buộc (enum)
+        totalAmount: total,                    
+        orderDate: currentDateTime,            
+        status: 'pending',                    
         paymentMethod: paymentMethod,
         deliveryTime: deliverySchedule.type === 'scheduled' ? deliverySchedule.value : null,
         items: JSON.stringify(cart.map(item => {
@@ -558,8 +558,7 @@ async function submitOrder() {
     }))                                   // trường bắt buộc (string/varchar)
     };
     
-    // Ghi lên Appwrite
-    // Kiểm tra trạng thái nhận đơn (system settings)
+  
     try {
         const settings = await getSystemSettings();
         if (settings.acceptingOrders === false) {
@@ -568,25 +567,25 @@ async function submitOrder() {
             return;
         }
     } catch (e) {
-        // Nếu không đọc được settings thì vẫn cho đặt (fallback)
+     
     }
 
     databases.createDocument(DATABASE_ID, 'orders', ID.unique(), orderData)
         .then(() => {
-            // Thành công
+          
             cart = [];
             updateCartCount();
             saveCartToLocalStorage();
             
-            // Kích hoạt hiệu ứng Pulse cho icon theo dõi để nhắc khách hàng
+       
             const trackIcon = document.getElementById('openTrackModal');
             if (trackIcon) trackIcon.classList.add('pulse');
 
-            // Customer page: only keep localStorage for cart (no orders history storage).
+          
             
             showToast(`✅ Đặt hàng thành công! Mã đơn: ${orderId}`, 'success');
             
-            // Hiển thị mã QR nếu chọn thanh toán chuyển khoản
+        
             if (paymentMethod === 'qr') {
                 showQRModal(shortId, total);
             }

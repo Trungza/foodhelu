@@ -100,18 +100,18 @@ export function initOrderDetailEvents(root) {
 
       modalBody.innerHTML = detailHtml;
 
-      // Trong file admin (ví dụ order-detail.js hoặc nơi xử lý)
+      
 
       const sendBtn = modalBody.querySelector("#sendToKitchenBtn");
       if (sendBtn) {
         sendBtn.addEventListener("click", async () => {
           try {
-            // 1. Cập nhật trạng thái đơn hàng (gửi xuống bếp)
+           
             await databases.updateDocument(DATABASE_ID, "orders", order.$id, {
               status: STATUS.STEP_2, // STATUS.STEP_2 là "processing" hoặc tùy bạn
             });
 
-            // 2. Tạo thông báo cho bếp (collection notifications)
+           
             try {
               const nowIso = new Date().toISOString();
               await databases.createDocument(
