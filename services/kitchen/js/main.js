@@ -99,9 +99,7 @@ function renderDashboard(user) {
           <p>Quản lý đơn hàng cần chế biến</p>
         </div>
         <div class="dashboard-actions">
-          <button class="ghost-button" id="kitchenOverloadBtn" title="Bật/tắt trạng thái quá tải">
-            <i class="fas fa-exclamation-circle"></i> Quá tải
-          </button>
+        
           <div class="notification-bell" id="notificationBell">
             <i class="fas fa-concierge-bell"></i>
             <span id="notification-badge" class="badge">0</span>
@@ -146,33 +144,7 @@ function renderDashboard(user) {
   const bell = document.getElementById("notificationBell");
   if (bell) bell.addEventListener("click", () => showNotificationsModal());
 
-  // Quá tải bếp
-  const overloadBtn = document.getElementById("kitchenOverloadBtn");
-  const applyOverloadUi = (isOverloaded) => {
-    if (!overloadBtn) return;
-    overloadBtn.classList.toggle("is-overloaded", !!isOverloaded);
-    overloadBtn.innerHTML = isOverloaded
-      ? `<i class="fas fa-exclamation-circle"></i> Quá tải: BẬT`
-      : `<i class="fas fa-exclamation-circle"></i> Quá tải`;
-  };
-  if (overloadBtn) {
-    getSystemSettings().then((s) => applyOverloadUi(s.kitchenOverloaded));
-    overloadBtn.addEventListener("click", async () => {
-      try {
-        const current = await getSystemSettings();
-        const next = await setSystemSettings(
-          { kitchenOverloaded: !current.kitchenOverloaded },
-        );
-        applyOverloadUi(next.kitchenOverloaded);
-      } catch (err) {
-        console.error(err);
-        alert(
-          "Không thể cập nhật trạng thái quá tải. Hãy kiểm tra collection `system_settings` trên Appwrite.",
-        );
-      }
-    });
-    subscribeSystemSettings((s) => applyOverloadUi(s.kitchenOverloaded));
-  }
+ 
 
   // Lắng nghe sự kiện đơn hàng mới thông qua Event Bus hoặc Realtime
   // Đây là logic bổ trợ để kích hoạt âm thanh khi realtime.js nhận được tín hiệu

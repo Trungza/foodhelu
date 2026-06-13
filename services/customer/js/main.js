@@ -97,6 +97,63 @@ function createAndInjectPageLoader() {
             0%, 100% { transform: scale(1); opacity: 0.8; }
             50% { transform: scale(1.1); opacity: 1; }
         }
+
+        body.orders-paused {
+          overflow: hidden;
+          touch-action: none;
+        }
+
+        #acceptingOrdersBanner {
+          position: fixed;
+          inset: 0;
+          z-index: 100000;
+          display: none;
+          align-items: center;
+          justify-content: center;
+          padding: 24px;
+          background: rgba(15, 23, 42, 0.62);
+          backdrop-filter: blur(10px);
+          -webkit-backdrop-filter: blur(10px);
+        }
+
+        #acceptingOrdersBanner .accepting-orders-banner-card {
+          width: min(520px, calc(100vw - 32px));
+          padding: 30px 28px 26px;
+          border-radius: 28px;
+          background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.98));
+          border: 1px solid rgba(255, 255, 255, 0.45);
+          box-shadow: 0 30px 80px rgba(15, 23, 42, 0.28);
+          text-align: center;
+          color: #0f172a;
+        }
+
+        #acceptingOrdersBanner .accepting-orders-banner-icon {
+          width: 72px;
+          height: 72px;
+          margin: 0 auto 18px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: linear-gradient(135deg, #ef4444, #f97316);
+          color: #fff;
+          font-size: 28px;
+          box-shadow: 0 18px 28px rgba(239, 68, 68, 0.28);
+        }
+
+        #acceptingOrdersBanner h2 {
+          margin: 0 0 10px;
+          font-size: clamp(26px, 4vw, 36px);
+          font-weight: 800;
+          letter-spacing: -0.03em;
+        }
+
+        #acceptingOrdersBanner p {
+          margin: 0;
+          font-size: 16px;
+          line-height: 1.7;
+          color: #475569;
+        }
     `;
   document.head.appendChild(style);
 }
@@ -140,26 +197,28 @@ function ensureAcceptingBanner() {
   if (banner) return banner;
   banner = document.createElement("div");
   banner.id = "acceptingOrdersBanner";
-  banner.style.cssText = [
-    "position: sticky",
-    "top: 0",
-    "z-index: 9999",
-    "display: none",
-    "padding: 10px 14px",
-    "background: rgba(239,68,68,0.92)",
-    "color: #fff",
-    "font-weight: 700",
-    "text-align: center",
-    "border-bottom: 1px solid rgba(0,0,0,0.25)",
-  ].join(";");
-  banner.textContent = "⏸️ Tạm ngừng nhận đơn. Vui lòng quay lại sau.";
+  banner.setAttribute("role", "alert");
+  banner.setAttribute("aria-live", "assertive");
+  banner.innerHTML = `
+    <div class="accepting-orders-banner-card">
+      <div class="accepting-orders-banner-icon">
+        <i class="fas fa-circle-pause"></i>
+      </div>
+      <h2>Tạm ngừng nhận đơn</h2>
+      <p>Vui lòng quay lại sau.</p>
+    </div>
+  `;
   document.body.prepend(banner);
   return banner;
 }
 
 function applyAcceptingOrdersUi(acceptingOrders) {
   const banner = ensureAcceptingBanner();
-  banner.style.display = acceptingOrders === false ? "block" : "none";
+  const ordersPaused = acceptingOrders === false;
+  banner.style.display = ordersPaused ? "flex" : "none";
+  document.body.classList.toggle("orders-paused", ordersPaused);
+  document.documentElement.classList.toggle("orders-paused", ordersPaused);
+  window.__acceptingOrdersLocked = ordersPaused;
 }
 
 // Khởi tạo tất cả khi trang load

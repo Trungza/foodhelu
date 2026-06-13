@@ -5,6 +5,10 @@ import { getSystemSettings } from '../../shared/js/system-settings.js';
 let cart = [];
 let isCheckoutMode = false;
 
+function isOrdersPaused() {
+    return window.__acceptingOrdersLocked === true;
+}
+
 // ========== HÀM CƠ BẢN ==========
 
 // Hiệu ứng rung cho card ở menu hoặc trong modal
@@ -75,6 +79,10 @@ function isAtMaxStock(item, requestedQuantity) {
 // Thêm sản phẩm vào giỏ hàng
 function addToCart(product) {
     if (!product || !product.id) return;
+    if (isOrdersPaused()) {
+        showToast('⏸️ Hệ thống đang tạm ngừng nhận đơn. Vui lòng quay lại sau.', 'error');
+        return;
+    }
 
     const existingProduct = cart.find(item => String(item.id) === String(product.id));
 
@@ -615,6 +623,10 @@ async function submitOrder() {
 // Mở modal giỏ hàng
 function openCartModal() {
     const modal = document.getElementById('cartModal');
+    if (isOrdersPaused()) {
+        showToast('⏸️ Hệ thống đang tạm ngừng nhận đơn. Vui lòng quay lại sau.', 'error');
+        return;
+    }
     if (modal) {
         if (isCheckoutMode) {
             backToCart();
