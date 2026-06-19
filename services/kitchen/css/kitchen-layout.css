@@ -1,0 +1,165 @@
+/* Kitchen Layout Styles */
+
+/* Shell Container */
+.service-shell, .kitchen-shell {
+    position: relative;
+    z-index: 1;
+    min-height: 100vh;
+}
+
+/* Dashboard Header/Topbar */
+.dashboard-topbar {
+    background: var(--card);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border);
+    padding: 1.25rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    transition: all 0.3s ease;
+}
+
+.dashboard-brand {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.dashboard-brand h1 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -0.3px;
+}
+
+.dashboard-brand p {
+    font-size: 0.85rem;
+    color: var(--muted);
+}
+
+.dashboard-actions {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    flex-wrap: wrap;
+}
+
+/* Main Content Area */
+.dashboard-main {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem;
+    position: relative;
+    z-index: 2;
+}
+
+/* Tabs Container */
+.kitchen-tabs {
+    background: var(--card);
+    border-radius: 60px;
+    padding: 0.25rem;
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+    width: fit-content;
+    backdrop-filter: blur(8px);
+    border: 1px solid var(--border);
+}
+
+.kitchen-tab {
+    background: transparent;
+    border: none;
+    padding: 0.65rem 1.8rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border-radius: 40px;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    white-space: nowrap;
+}
+
+.kitchen-tab i {
+    font-size: 1rem;
+}
+
+.kitchen-tab:hover {
+    color: var(--text);
+    background: rgba(59, 130, 246, 0.08);
+}
+
+.kitchen-tab.active {
+    background: var(--primary);
+    color: white;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+/* Orders Container */
+.kitchen-orders-container {
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.kitchen-tab-content {
+    width: 100%;
+    animation: fadeInUp 0.4s ease;
+}
+
+.kitchen-tab-content[style*="display: none"] {
+    display: none !important;
+}
+
+/* Grid Layout */
+.kitchen-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+    gap: 1.75rem;
+    animation: fadeInUp 0.4s ease;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .dashboard-topbar {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 1rem;
+    }
+
+    .dashboard-actions {
+        width: 100%;
+        gap: 0.75rem;
+    }
+
+    .dashboard-main {
+        padding: 1rem;
+    }
+
+    .kitchen-tabs {
+        width: 100%;
+        overflow-x: auto;
+    }
+
+    .kitchen-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .dashboard-brand h1 {
+        font-size: 1.5rem;
+    }
+
+    .kitchen-tab {
+        padding: 0.5rem 1rem;
+        font-size: 0.85rem;
+    }
+}

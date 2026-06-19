@@ -1,0 +1,285 @@
+/* Kitchen Order Cards & Components */
+
+/* Kitchen Card - Glassmorph */
+.kitchen-card {
+    background: var(--card);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--border);
+    border-radius: 28px;
+    padding: 1.5rem;
+    transition: all 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+}
+
+.kitchen-card:hover {
+    transform: translateY(-6px) scale(1.01);
+    border-color: rgba(59, 130, 246, 0.28);
+    box-shadow: 0 20px 35px -12px rgba(0, 0, 0, 0.1);
+}
+
+/* Card Header */
+.kitchen-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--border);
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.order-id-group {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.order-id {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.order-time {
+    font-size: 0.75rem;
+    color: var(--muted);
+}
+
+.order-status {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    background: rgba(245, 158, 11, 0.12);
+    color: #d97706;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.order-status.pending {
+    background: rgba(245, 158, 11, 0.12);
+    color: #d97706;
+}
+
+.order-status.in_kitchen {
+    background: rgba(59, 130, 246, 0.12);
+    color: var(--primary);
+}
+
+.order-status.completed {
+    background: rgba(16, 185, 129, 0.12);
+    color: var(--success);
+}
+
+/* Card Body */
+.kitchen-card-body {
+    margin-bottom: 1rem;
+}
+
+.customer-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+    padding: 0.75rem;
+    background: rgba(248, 250, 252, 0.96);
+    border-radius: 12px;
+    border: 1px solid var(--border-light);
+}
+
+.customer-info-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+}
+
+.customer-info i {
+    width: 1.25rem;
+    color: var(--primary);
+    flex-shrink: 0;
+    margin-top: 0.1rem;
+}
+
+/* Order Items */
+.order-items {
+    margin-bottom: 1rem;
+}
+
+.items-title {
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--text);
+}
+
+.order-items ul {
+    list-style: none;
+    padding-left: 0;
+}
+
+.order-items li {
+    font-size: 0.85rem;
+    color: var(--muted);
+    margin-bottom: 0.5rem;
+    padding-left: 1rem;
+    position: relative;
+}
+
+.order-items li:before {
+    content: "•";
+    position: absolute;
+    left: 0;
+    color: var(--primary);
+}
+
+.combo-item {
+    margin-top: 0.75rem;
+    padding: 0.75rem;
+    background: rgba(59, 130, 246, 0.04);
+    border-left: 2px solid var(--primary);
+    border-radius: 6px;
+}
+
+.combo-item-name {
+    font-weight: 600;
+    color: var(--text);
+    font-size: 0.85rem;
+}
+
+.combo-item ul {
+    margin-left: 1rem;
+    margin-top: 0.5rem;
+}
+
+.combo-item li {
+    font-size: 0.8rem;
+}
+
+/* Order Total */
+.order-total {
+    text-align: right;
+    padding-top: 0.75rem;
+    border-top: 1px dashed var(--border);
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 1rem;
+}
+
+.order-total-label {
+    font-size: 0.8rem;
+    color: var(--muted);
+    font-weight: 500;
+    display: block;
+}
+
+/* Card Footer - Buttons */
+.kitchen-card-footer {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: 1rem;
+    flex-wrap: wrap;
+}
+
+.kitchen-card-footer button {
+    flex: 1;
+    padding: 0.75rem;
+    border-radius: 40px;
+    font-weight: 600;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+    min-width: 100px;
+}
+
+.btn-start-cooking {
+    background: var(--primary);
+    color: white;
+}
+
+.btn-start-cooking:hover {
+    background: var(--primary-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.btn-start-cooking:active {
+    transform: translateY(0);
+}
+
+.btn-complete {
+    background: var(--success);
+    color: white;
+}
+
+.btn-complete:hover {
+    background: var(--success-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.btn-complete:active {
+    transform: translateY(0);
+}
+
+.btn-report-issue {
+    background: rgba(239, 68, 68, 0.1);
+    color: #b91c1c;
+    border: 1px solid rgba(239, 68, 68, 0.22);
+}
+
+.btn-report-issue:hover {
+    background: rgba(239, 68, 68, 0.14);
+    border-color: rgba(239, 68, 68, 0.38);
+}
+
+.btn-report-issue:active {
+    background: rgba(239, 68, 68, 0.2);
+}
+
+/* Button States */
+button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+button:disabled:hover {
+    transform: none;
+    box-shadow: none;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+    .kitchen-card {
+        padding: 1rem;
+    }
+
+    .kitchen-card-footer {
+        flex-direction: column;
+    }
+
+    .kitchen-card-footer button {
+        width: 100%;
+    }
+}
+
+/* Kitchen Note */
+.kitchen-note {
+    background: rgba(245, 158, 11, 0.08);
+    border-left: 3px solid #f59e0b;
+    padding: 0.75rem;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    color: #92400e;
+    margin-top: 0.75rem;
+    display: flex;
+    gap: 0.5rem;
+}
+
+.kitchen-note i {
+    color: #f59e0b;
+    flex-shrink: 0;
+}

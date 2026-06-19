@@ -197,7 +197,7 @@ export async function renderRevenueStats() {
                 <div class="stat-value">${formatCurrency(revenue)}</div>
                 <div class="stat-meta">
                     <span>📦 ${orders} đơn</span>
-                    <span>Avg: ${formatCurrency(avg)}</span>
+                    <span>Trung Bình: ${formatCurrency(avg)}</span>
                 </div>
             </div>
         `;

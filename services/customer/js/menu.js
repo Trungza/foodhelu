@@ -918,3 +918,4 @@ if (document.readyState === "loading") {
 }
 
 window.addComboToCart = addComboToCart;
+window.refreshMenuCombosFromDb = loadCombosFromApi;

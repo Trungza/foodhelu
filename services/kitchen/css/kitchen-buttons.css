@@ -1,0 +1,162 @@
+/* Kitchen Button Styles */
+
+/* User Chip */
+.user-chip {
+    background: rgba(59, 130, 246, 0.08);
+    border: 1px solid rgba(59, 130, 246, 0.16);
+    padding: 0.5rem 1.2rem;
+    border-radius: 40px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--primary);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.2s ease;
+    cursor: default;
+}
+
+.user-chip i {
+    font-size: 1rem;
+}
+
+.user-chip:hover {
+    background: rgba(59, 130, 246, 0.12);
+}
+
+/* Ghost Button (Logout, etc.) */
+.ghost-button {
+    background: rgba(255, 255, 255, 0.96);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 0.5rem 1.2rem;
+    border-radius: 40px;
+    font-weight: 500;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    white-space: nowrap;
+}
+
+.ghost-button i {
+    font-size: 1rem;
+}
+
+.ghost-button:hover {
+    background: rgba(59, 130, 246, 0.08);
+    border-color: rgba(59, 130, 246, 0.22);
+    color: var(--primary);
+}
+
+.ghost-button:active {
+    transform: scale(0.98);
+}
+
+/* Ghost Button - Danger (Logout variant) */
+.ghost-button.is-danger {
+    background: rgba(239, 68, 68, 0.08);
+    border-color: rgba(239, 68, 68, 0.22);
+    color: #b91c1c;
+}
+
+.ghost-button.is-danger:hover {
+    background: rgba(239, 68, 68, 0.14);
+    border-color: rgba(239, 68, 68, 0.38);
+    color: #991b1b;
+}
+
+/* Ghost Button - Overloaded State */
+.ghost-button.is-overloaded {
+    background: rgba(239, 68, 68, 0.1);
+    border-color: rgba(239, 68, 68, 0.28);
+    color: #b91c1c;
+    animation: pulse-red 2s ease-in-out infinite;
+}
+
+.ghost-button.is-overloaded:hover {
+    background: rgba(239, 68, 68, 0.14);
+    border-color: rgba(239, 68, 68, 0.38);
+    color: #991b1b;
+}
+
+@keyframes pulse-red {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.8;
+    }
+}
+
+/* Notification Bell */
+.notification-bell {
+    position: relative;
+    cursor: pointer;
+    font-size: 1.25rem;
+    color: var(--text);
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+}
+
+.notification-bell:hover {
+    color: var(--primary);
+    transform: scale(1.1);
+}
+
+.notification-bell .badge {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background: #ef4444;
+    color: white;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.65rem;
+    font-weight: 700;
+    border: 2px solid white;
+}
+
+.notification-bell .badge.hide {
+    display: none;
+}
+
+/* Loading Spinner Button */
+.btn-loading {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-loading i {
+    animation: spin 1s linear infinite;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .ghost-button span {
+        display: none;
+    }
+
+    .ghost-button {
+        padding: 0.5rem;
+    }
+
+    .user-chip span {
+        display: none;
+    }
+
+    .user-chip {
+        padding: 0.5rem;
+    }
+}

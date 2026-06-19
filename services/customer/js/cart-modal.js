@@ -1,5 +1,6 @@
 // CART.JS - QUẢN LÝ GIỎ HÀNG VÀ CHECKOUT
-import { databases, DATABASE_ID, ID } from '../../shared/js/appwrite.js';
+import { databases, DATABASE_ID, ID, Query } from '../../shared/js/appwrite.js';
+import { DB } from '../../shared/js/config.js';
 import { getSystemSettings } from '../../shared/js/system-settings.js';
 // Dữ liệu giỏ hàng
 let cart = [];
@@ -7,6 +8,111 @@ let isCheckoutMode = false;
 
 function isOrdersPaused() {
     return window.__acceptingOrdersLocked === true;
+}
+
+function getTodayDateKey() {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
+
+function collectStockUsageFromCartItems(items) {
+    const usageByDishId = new Map();
+
+    items.forEach((item) => {
+        if (item.isCombo && Array.isArray(item.comboItems)) {
+            item.comboItems.forEach((comboItem) => {
+                const dishId = String(comboItem?.dishId || '').trim();
+                const qtyPerCombo = Number(comboItem?.qtyPerCombo || 0);
+                if (!dishId || qtyPerCombo <= 0) return;
+
+                const current = usageByDishId.get(dishId) || 0;
+                usageByDishId.set(dishId, current + (Number(item.quantity || 0) * qtyPerCombo));
+            });
+            return;
+        }
+
+        const dishId = String(item?.dishId || item?.id || '').trim();
+        const quantity = Number(item?.quantity || 0);
+        if (!dishId || quantity <= 0) return;
+
+        const current = usageByDishId.get(dishId) || 0;
+        usageByDishId.set(dishId, current + quantity);
+    });
+
+    return usageByDishId;
+}
+
+async function updateDailyStockForCartItems(items, direction = 1) {
+    const usageByDishId = collectStockUsageFromCartItems(items);
+    if (!usageByDishId.size) return;
+
+    const dateKey = getTodayDateKey();
+    const stockDocsRes = await databases.listDocuments(DATABASE_ID, DB.COLLECTIONS.DAILY_STOCK, [
+        Query.equal('dateKey', dateKey)
+    ]);
+
+    const stockDocsByDishId = new Map();
+    (stockDocsRes.documents || []).forEach((doc) => {
+        const dishId = String(doc?.dishId || '').trim();
+        if (!dishId) return;
+        stockDocsByDishId.set(dishId, doc);
+    });
+
+    const updates = [];
+    usageByDishId.forEach((usage, dishId) => {
+        const stockDoc = stockDocsByDishId.get(dishId);
+        if (!stockDoc) return;
+
+        const delta = Number(usage) * Number(direction || 1);
+        if (!delta) return;
+
+        const remainingQty = Number.isFinite(Number(stockDoc?.remainingQty))
+            ? Number(stockDoc.remainingQty)
+            : Math.max(0,
+                (Number(stockDoc?.openingQty) || 0)
+                - (Number(stockDoc?.soldAutoQty) || 0)
+                - (Number(stockDoc?.soldAdjustQty) || 0)
+            );
+        const openingQty = Number.isFinite(Number(stockDoc?.openingQty))
+            ? Number(stockDoc.openingQty)
+            : null;
+
+        const rawNextRemainingQty = remainingQty - delta;
+        const nextRemainingQty = delta > 0
+            ? Math.max(0, rawNextRemainingQty)
+            : (openingQty !== null ? Math.min(openingQty, rawNextRemainingQty) : Math.max(0, rawNextRemainingQty));
+        const nextSoldAutoQty = Math.max(0, (Number(stockDoc?.soldAutoQty) || 0) + delta);
+
+        if (delta > 0 && rawNextRemainingQty < 0) {
+            throw new Error(`Không đủ tồn kho cho món ${stockDoc.dishName || dishId}`);
+        }
+
+        updates.push(
+            databases.updateDocument(DATABASE_ID, DB.COLLECTIONS.DAILY_STOCK, stockDoc.$id, {
+                remainingQty: nextRemainingQty,
+                soldAutoQty: nextSoldAutoQty,
+                updatedAt: new Date().toISOString()
+            })
+        );
+    });
+
+    await Promise.all(updates);
+}
+
+async function syncCustomerAvailabilityViews() {
+    const refreshTasks = [];
+    if (typeof window.refreshDishesFromDb === 'function') {
+        refreshTasks.push(window.refreshDishesFromDb());
+    }
+    if (typeof window.refreshMenuCombosFromDb === 'function') {
+        refreshTasks.push(window.refreshMenuCombosFromDb());
+    }
+
+    if (!refreshTasks.length) return;
+    await Promise.all(refreshTasks);
 }
 
 // ========== HÀM CƠ BẢN ==========
@@ -77,7 +183,7 @@ function isAtMaxStock(item, requestedQuantity) {
 }
 
 // Thêm sản phẩm vào giỏ hàng
-function addToCart(product) {
+async function addToCart(product) {
     if (!product || !product.id) return;
     if (isOrdersPaused()) {
         showToast('⏸️ Hệ thống đang tạm ngừng nhận đơn. Vui lòng quay lại sau.', 'error');
@@ -85,68 +191,115 @@ function addToCart(product) {
     }
 
     const existingProduct = cart.find(item => String(item.id) === String(product.id));
+    const stockChangeItem = {
+        id: product.id,
+        dishId: product.dishId,
+        name: product.name || 'Không rõ tên',
+        price: product.price || 0,
+        image: product.image || '',
+        quantity: 1,
+        maxStock: product.maxStock,
+        isCombo: product.isCombo || false,
+        comboItems: product.comboItems || null,
+        note: product.note || ''
+    };
 
     if (existingProduct) {
-        if (isAtMaxStock(existingProduct, existingProduct.quantity + 1)) {
-            showToast(`Vượt quá giới hạn phục vụ cho ${product.name}`, 'error');
+        try {
+            await updateDailyStockForCartItems([{ ...stockChangeItem, quantity: 1 }], 1);
+        } catch (error) {
+            showToast(error?.message || `Vượt quá giới hạn phục vụ cho ${product.name}`, 'error');
             triggerCardShake(product.id, product.isCombo);
             return;
         }
         existingProduct.quantity += 1;
     } else {
-        if (isAtMaxStock(product, 1)) {
-            showToast(`Rất tiếc, món này không đủ số lượng để phục vụ`, 'error');
+        try {
+            await updateDailyStockForCartItems([stockChangeItem], 1);
+        } catch (error) {
+            showToast(error?.message || `Rất tiếc, món này không đủ số lượng để phục vụ`, 'error');
             triggerCardShake(product.id, product.isCombo);
             return;
         }
         cart.push({
-            id: product.id,
-            dishId: product.dishId,
-            name: product.name || 'Không rõ tên',
-            price: product.price || 0,
-            image: product.image || '',
+            id: stockChangeItem.id,
+            dishId: stockChangeItem.dishId,
+            name: stockChangeItem.name,
+            price: stockChangeItem.price,
+            image: stockChangeItem.image,
             quantity: 1,
-            maxStock: product.maxStock,
-            isCombo: product.isCombo || false,
-            comboItems: product.comboItems || null,
-            note: product.note || ''
+            maxStock: stockChangeItem.maxStock,
+            isCombo: stockChangeItem.isCombo,
+            comboItems: stockChangeItem.comboItems,
+            note: stockChangeItem.note
         });
     }
 
     updateCartCount();
     saveCartToLocalStorage();
     renderCartItems();
+    await syncCustomerAvailabilityViews().catch((error) => {
+        console.warn('Không thể làm mới menu sau khi thêm món vào giỏ:', error);
+    });
     showToast(`${product.name} đã được thêm vào giỏ hàng!`, 'success');
 }
 
 // Xóa sản phẩm khỏi giỏ hàng
-function removeFromCart(productId) {
+async function removeFromCart(productId) {
+    const existingProduct = cart.find(item => String(item.id) === String(productId));
+    if (existingProduct) {
+        try {
+            await updateDailyStockForCartItems([existingProduct], -1);
+        } catch (error) {
+            showToast(error?.message || 'Không thể hoàn lại tồn kho cho món này', 'error');
+            return;
+        }
+    }
+
     cart = cart.filter(item => String(item.id) !== String(productId));
     updateCartCount();
     saveCartToLocalStorage();
     renderCartItems();
+    await syncCustomerAvailabilityViews().catch((error) => {
+        console.warn('Không thể làm mới menu sau khi xóa món khỏi giỏ:', error);
+    });
     showToast('Đã xóa món ăn khỏi giỏ hàng', 'info');
 }
 
 // Cập nhật số lượng sản phẩm
-function updateQuantity(productId, newQuantity) {
+async function updateQuantity(productId, newQuantity) {
     if (newQuantity <= 0) {
-        removeFromCart(productId);
+        await removeFromCart(productId);
         return;
     }
 
     const product = cart.find(item => String(item.id) === String(productId));
     if (product) {
-        if (newQuantity > product.quantity && isAtMaxStock(product, newQuantity)) {
-            showToast(`Nhà bếp không còn đủ nguyên liệu cho số lượng này`, 'error');
-            triggerCardShake(productId, product.isCombo);
-            return;
+        const delta = newQuantity - product.quantity;
+        if (delta > 0) {
+            try {
+                await updateDailyStockForCartItems([{ ...product, quantity: delta }], 1);
+            } catch (error) {
+                showToast(error?.message || `Nhà bếp không còn đủ nguyên liệu cho số lượng này`, 'error');
+                triggerCardShake(productId, product.isCombo);
+                return;
+            }
+        } else if (delta < 0) {
+            try {
+                await updateDailyStockForCartItems([{ ...product, quantity: Math.abs(delta) }], -1);
+            } catch (error) {
+                showToast(error?.message || 'Không thể cập nhật lại tồn kho', 'error');
+                return;
+            }
         }
 
         product.quantity = newQuantity;
         updateCartCount();
         saveCartToLocalStorage();
         renderCartItems();
+        await syncCustomerAvailabilityViews().catch((error) => {
+            console.warn('Không thể làm mới menu sau khi cập nhật số lượng:', error);
+        });
     }
 }
 
@@ -578,45 +731,51 @@ async function submitOrder() {
      
     }
 
-    databases.createDocument(DATABASE_ID, 'orders', ID.unique(), orderData)
-        .then(() => {
-          
-            cart = [];
-            updateCartCount();
-            saveCartToLocalStorage();
-            
-       
-            const trackIcon = document.getElementById('openTrackModal');
-            if (trackIcon) trackIcon.classList.add('pulse');
+    try {
+        await databases.createDocument(DATABASE_ID, 'orders', ID.unique(), orderData);
 
-          
-            
-            showToast(`✅ Đặt hàng thành công! Mã đơn: ${orderId}`, 'success');
-            
-        
-            if (paymentMethod === 'qr') {
-                showQRModal(shortId, total);
-            }
+        cart = [];
+        updateCartCount();
+        saveCartToLocalStorage();
 
-            // Reset form
-            document.getElementById('customerName').value = '';
-            document.getElementById('customerPhone').value = '';
-            document.getElementById('customerAddress').value = '';
-            if (document.getElementById('customerDeliveryTime')) {
-                document.getElementById('customerDeliveryTime').value = formatDateTimeLocal(getEarliestDeliveryDate());
-            }
-            document.querySelector('input[name="deliveryTimeType"][value="asap"]')?.click();
-            
-            backToCart();
-            closeCartModal();
-        })
-        .catch(error => {
-            console.error('Lỗi khi lưu đơn hàng:', error);
-            showToast('Đặt hàng thất bại: ' + (error.message || 'Vui lòng thử lại'), 'error');
-        })
-        .finally(() => {
-            showLoading(false);
+        const refreshTasks = [];
+        if (typeof window.refreshDishesFromDb === 'function') {
+            refreshTasks.push(window.refreshDishesFromDb());
+        }
+        if (typeof window.refreshMenuCombosFromDb === 'function') {
+            refreshTasks.push(window.refreshMenuCombosFromDb());
+        }
+
+        const trackIcon = document.getElementById('openTrackModal');
+        if (trackIcon) trackIcon.classList.add('pulse');
+
+        showToast(`✅ Đặt hàng thành công! Mã đơn: ${orderId}`, 'success');
+
+        if (paymentMethod === 'qr') {
+            showQRModal(shortId, total);
+        }
+
+        // Reset form
+        document.getElementById('customerName').value = '';
+        document.getElementById('customerPhone').value = '';
+        document.getElementById('customerAddress').value = '';
+        if (document.getElementById('customerDeliveryTime')) {
+            document.getElementById('customerDeliveryTime').value = formatDateTimeLocal(getEarliestDeliveryDate());
+        }
+        document.querySelector('input[name="deliveryTimeType"][value="asap"]')?.click();
+
+        await Promise.all(refreshTasks).catch((error) => {
+            console.warn('Không thể làm mới menu sau khi đặt hàng:', error);
         });
+
+        backToCart();
+        closeCartModal();
+    } catch (error) {
+        console.error('Lỗi khi lưu đơn hàng:', error);
+        showToast('Đặt hàng thất bại: ' + (error.message || 'Vui lòng thử lại'), 'error');
+    } finally {
+        showLoading(false);
+    }
 }
 // ========== MODAL CONTROL ==========
 

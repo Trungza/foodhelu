@@ -75,47 +75,62 @@ function renderOrdersList(orders) {
     <div class="kitchen-grid">
       ${orders
         .map((order) => {
-          const isCooking = order.status === STATUS.STEP_2;
+          const isCooking = order.status === STATUS.STEP_3;
           let itemsList = [];
           try {
             itemsList = JSON.parse(order.items) || [];
           } catch (e) {}
 
+          let statusClass = 'pending';
+          if (order.status === STATUS.STEP_2) statusClass = 'pending';
+          else if (order.status === STATUS.STEP_3) statusClass = 'in_kitchen';
+          else if (order.status === STATUS.STEP_4) statusClass = 'completed';
+
           return `
             <div class="kitchen-card" data-order-id="${order.$id}">
               <div class="kitchen-card-header">
-                <div>
+                <div class="order-id-group">
                   <span class="order-id">#${order.$id.slice(-8)}</span>
                   <span class="order-time"><i class="far fa-clock"></i> ${formatDateTime(order.orderDate)}</span>
                 </div>
-                <span class="order-status ${order.status}">${getStatusText(order.status)}</span>
+                <span class="order-status ${statusClass}">${getStatusText(order.status)}</span>
               </div>
               <div class="kitchen-card-body">
+                ${order.customerName || order.customerPhone || order.customerAddress ? `
+                  <div class="customer-info">
+                    ${order.customerName ? `<div class="customer-info-row"><i class="fas fa-user"></i> <span>${escapeHtml(order.customerName)}</span></div>` : ''}
+                    ${order.customerPhone ? `<div class="customer-info-row"><i class="fas fa-phone"></i> <span>${escapeHtml(order.customerPhone)}</span></div>` : ''}
+                    ${order.customerAddress ? `<div class="customer-info-row"><i class="fas fa-map-marker-alt"></i> <span>${escapeHtml(order.customerAddress)}</span></div>` : ''}
+                  </div>
+                ` : ''}
                 <div class="order-items">
-                  <div class="items-title">📋 Món ăn:</div>
+                  <div class="items-title"><i class="fas fa-list"></i> Món ăn:</div>
                   <ul>
                     ${itemsList
                       .map((item) => {
                         if (item.isCombo && item.comboItems) {
                           return `
                             <li class="combo-item">
-                              <strong>🍱 ${escapeHtml(item.name)} x${item.quantity}</strong>
+                              <div class="combo-item-name"><i class="fas fa-box"></i> ${escapeHtml(item.name)} x${item.quantity}</div>
                               <ul>
-                                ${item.comboItems.map((sub) => `<li>• ${escapeHtml(sub.name)} x${sub.qtyPerCombo}</li>`).join("")}
+                                ${item.comboItems.map((sub) => `<li><i class="fas fa-check-circle"></i> ${escapeHtml(sub.name)} x${sub.qtyPerCombo}</li>`).join("")}
                               </ul>
                             </li>`;
                         }
-                        return `<li>🍽️ ${escapeHtml(item.name)} x${item.quantity}</li>`;
+                        return `<li><i class="fas fa-utensils"></i> ${escapeHtml(item.name)} x${item.quantity}</li>`;
                       })
                       .join("")}
                   </ul>
                 </div>
-                <div class="order-total"><strong>Tổng cộng:</strong> ${formatCurrency(order.totalAmount)}</div>
-                ${order.kitchenNote ? `<div class="kitchen-note"><i class="fas fa-sticky-note"></i> ${escapeHtml(order.kitchenNote)}</div>` : ""}
+                <div class="order-total">
+                  <span class="order-total-label">💰 Tổng cộng:</span>
+                  <strong>${formatCurrency(order.totalAmount)}</strong>
+                </div>
+                ${order.kitchenNote ? `<div class="kitchen-note"><i class="fas fa-sticky-note"></i> Ghi chú: ${escapeHtml(order.kitchenNote)}</div>` : ""}
               </div>
               <div class="kitchen-card-footer">
-                ${isCooking ? `<button class="btn-start-cooking" data-id="${order.$id}"><i class="fas fa-play"></i> Bắt đầu nấu</button>` : `<button class="btn-complete" data-id="${order.$id}"><i class="fas fa-check"></i> Hoàn thành</button>`}
-                <button class="btn-report-issue" data-id="${order.$id}"><i class="fas fa-exclamation-triangle"></i> Báo thiếu món</button>
+                ${isCooking ? `<button class="btn-complete" data-id="${order.$id}"><i class="fas fa-check"></i> Hoàn thành</button>` : `<button class="btn-start-cooking" data-id="${order.$id}"><i class="fas fa-play"></i> Bắt đầu nấu</button>`}
+                <button class="btn-report-issue" data-id="${order.$id}"><i class="fas fa-exclamation-circle"></i> Báo sự cố</button>
               </div>
             </div>
           `;

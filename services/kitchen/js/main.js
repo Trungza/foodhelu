@@ -6,7 +6,6 @@ import {
 } from "../../shared/js/auth-service.js";
 import { showConfirmDialog } from "../../shared/components/dialog.js";
 import { escapeHtml } from "../../shared/js/utils.js";
-import { kitchenStyles } from "../styles/kitchen-styles.js";
 import {
   renderOrders,
   attachOrdersEvents,
@@ -68,16 +67,6 @@ function hidePageLoader() {
 }
 
 createAndInjectPageLoader();
-
-// ========== Các hàm tiện ích ==========
-let stylesInjected = false;
-function injectKitchenStyles() {
-  if (stylesInjected) return;
-  const style = document.createElement("style");
-  style.textContent = kitchenStyles;
-  document.head.appendChild(style);
-  stylesInjected = true;
-}
 
 function renderShell(content) {
   const app = document.getElementById("app");
@@ -166,7 +155,6 @@ function renderDashboard(user) {
 async function bootstrap() {
   try {
     renderShell(`<div class="loading-state"><i class="fas fa-spinner fa-pulse"></i><p>Đang kiểm tra đăng nhập...</p></div>`);
-    injectKitchenStyles();
 
     const user = await getCurrentUser();
     if (!user) return redirectToGateway("Vui lòng đăng nhập.");
